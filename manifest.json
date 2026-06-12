@@ -1,0 +1,17 @@
+{
+  "name": "Giresun Yöresel",
+  "short_name": "GiresunYöresel",
+  "description": "Giresun'dan doğal yöresel ürünler — sipariş ver, fiyatları takip et",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F4F7F2",
+  "theme_color": "#1B4D2E",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "logo.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "logo.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "screenshots": [
+    { "src": "reklam.jpg", "sizes": "1080x1920", "type": "image/jpeg", "form_factor": "narrow" }
+  ]
+}

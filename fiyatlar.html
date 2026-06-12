@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fındık & Çay Fiyatları – Giresun Yöresel</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1B4D2E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Giresun Yöresel">
+<link rel="apple-touch-icon" href="logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Nunito', sans-serif; background: #F4F7F2; color: #1a1a1a; min-height: 100vh; }
+
+/* NAV */
+nav { background: #fff; border-bottom: 1px solid #DDE5DA; padding: 0 24px; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.nav-brand img { height: 40px; width: auto; }
+.nav-brand span { font-size: 15px; font-weight: 700; color: #0F2D1A; }
+.nav-brand span em { color: #3A7D44; font-style: normal; }
+.nav-back { font-size: 13px; color: #3A7D44; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 5px; }
+.nav-back:hover { color: #0F2D1A; }
+
+/* HERO */
+.page-hero { background: linear-gradient(135deg, #0F2D1A 0%, #1B4D2E 100%); padding: 40px 24px 36px; text-align: center; }
+.page-hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(1.6rem, 4vw, 2.4rem); color: #fff; margin-bottom: 8px; }
+.page-hero p { font-size: 14px; color: rgba(255,255,255,.75); }
+.update-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2); border-radius: 20px; padding: 5px 14px; font-size: 12px; color: rgba(255,255,255,.85); margin-top: 12px; }
+.update-dot { width: 7px; height: 7px; border-radius: 50%; background: #7dba84; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.4;} }
+
+/* MAIN */
+.main { max-width: 900px; margin: 0 auto; padding: 28px 16px 60px; }
+.section-label { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; color: #3A7D44; margin: 28px 0 12px; display: flex; align-items: center; gap: 8px; }
+.section-label::after { content:''; flex:1; height:1px; background:#DDE5DA; }
+
+/* BIG PRICE CARDS */
+.big-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 8px; }
+.big-card { background: #fff; border: 1px solid #DDE5DA; border-radius: 16px; padding: 20px 18px; position: relative; overflow: hidden; }
+.big-card::before { content:''; position:absolute; top:0; left:0; right:0; height:4px; background: var(--accent); }
+.big-card .source { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #888; margin-bottom: 8px; }
+.big-card .label { font-size: 13px; color: #555; margin-bottom: 6px; }
+.big-card .price { font-size: 32px; font-weight: 800; color: var(--accent); line-height: 1; }
+.big-card .price span { font-size: 16px; font-weight: 600; }
+.big-card .sub { font-size: 12px; color: #888; margin-top: 6px; }
+.big-card .trend { position: absolute; top: 16px; right: 16px; font-size: 18px; }
+
+/* TABLE CARD */
+.tcard { background: #fff; border: 1px solid #DDE5DA; border-radius: 14px; overflow: hidden; margin-bottom: 16px; }
+.tcard-header { padding: 14px 18px 12px; border-bottom: 1px solid #EEF2EC; display: flex; align-items: center; gap: 10px; }
+.tcard-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+.tcard-title { font-size: 14px; font-weight: 700; color: #0F2D1A; }
+.tcard-sub { font-size: 12px; color: #888; }
+table { width: 100%; border-collapse: collapse; }
+th { padding: 10px 16px; text-align: left; font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .06em; background: #F4F7F2; border-bottom: 1px solid #EEF2EC; }
+td { padding: 13px 16px; font-size: 13.5px; border-bottom: 1px solid #F0EDE7; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: #FAFBF9; }
+.td-name { font-weight: 600; color: #0F2D1A; }
+.price-cell { font-weight: 700; color: #1B4D2E; }
+.range-cell { color: #555; font-size: 13px; }
+.badge-up { display:inline-block; background:#FEECEB; color:#C0392B; font-size:11px; font-weight:700; padding:2px 7px; border-radius:20px; }
+.badge-dn { display:inline-block; background:#EAF3DE; color:#27500A; font-size:11px; font-weight:700; padding:2px 7px; border-radius:20px; }
+.badge-st { display:inline-block; background:#F1EFE8; color:#555; font-size:11px; font-weight:700; padding:2px 7px; border-radius:20px; }
+
+/* INFO BOX */
+.info-box { background: #FFF8E7; border: 1px solid #F5DFA0; border-radius: 12px; padding: 14px 16px; font-size: 13px; color: #7A5C00; line-height: 1.65; margin-top: 8px; }
+.info-box strong { display: block; margin-bottom: 4px; font-size: 13.5px; }
+
+/* CHART */
+.chart-wrap { background: #fff; border: 1px solid #DDE5DA; border-radius: 14px; padding: 20px 18px; margin-bottom: 16px; }
+.chart-title { font-size: 13px; font-weight: 700; color: #0F2D1A; margin-bottom: 16px; }
+.bar-chart { display: flex; flex-direction: column; gap: 10px; }
+.bar-row { display: flex; align-items: center; gap: 10px; }
+.bar-label { font-size: 12px; color: #555; min-width: 80px; flex-shrink: 0; }
+.bar-track { flex: 1; background: #EEF2EC; border-radius: 6px; height: 22px; overflow: hidden; position: relative; }
+.bar-fill { height: 100%; border-radius: 6px; display: flex; align-items: center; padding-left: 8px; font-size: 11px; font-weight: 700; color: #fff; transition: width 1s ease; }
+.bar-val { font-size: 12px; font-weight: 700; color: #1B4D2E; min-width: 50px; text-align: right; }
+
+/* TABS */
+.tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.tab { padding: 8px 18px; border-radius: 20px; border: 1.5px solid #C8D4C4; background: #fff; font-size: 13px; font-weight: 600; color: #555; cursor: pointer; transition: all .2s; }
+.tab.active { background: #1B4D2E; color: #fff; border-color: #1B4D2E; }
+
+/* FOOTER */
+.page-footer { text-align: center; padding: 20px; font-size: 12px; color: #888; }
+
+@media (max-width: 600px) {
+  th:last-child, td:last-child { display: none; }
+  .big-card .price { font-size: 26px; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-brand">
+    <img src="logo.png" alt="Giresun Yöresel">
+    <span>Giresun <em>Yöresel</em></span>
+  </a>
+  <a href="index.html" class="nav-back">← Siteye Dön</a>
+</nav>
+
+<div class="page-hero">
+  <h1>Fındık & Çay Fiyatları</h1>
+  <p>Karadeniz bölgesi güncel piyasa verileri</p>
+  <div class="update-badge">
+    <span class="update-dot"></span>
+    <span id="update-time">Güncelleniyor…</span>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('findik', this)">🌰 Fındık</button>
+    <button class="tab" onclick="showTab('cay', this)">🍃 Çay</button>
+  </div>
+
+  <!-- ───── FINDIK ───── -->
+  <div id="tab-findik">
+
+    <div class="big-cards">
+      <div class="big-card" style="--accent:#1B4D2E">
+        <span class="trend">📈</span>
+        <div class="source">TMO</div>
+        <div class="label">Giresun Kalite (Kabuklu)</div>
+        <div class="price">200 <span>₺/kg</span></div>
+        <div class="sub">Resmi alım fiyatı · 2026</div>
+      </div>
+      <div class="big-card" style="--accent:#3A7D44">
+        <span class="trend">📈</span>
+        <div class="source">Fiskobirlik</div>
+        <div class="label">Giresun Kalite (İç)</div>
+        <div class="price">240 <span>₺/kg</span></div>
+        <div class="sub">Ortak alım fiyatı · Mayıs 2026</div>
+      </div>
+      <div class="big-card" style="--accent:#7dba84">
+        <span class="trend">📊</span>
+        <div class="source">Serbest Piyasa</div>
+        <div class="label">Giresun Bölgesi Ortalama</div>
+        <div class="price">215<span style="font-size:14px">–240</span> <span>₺</span></div>
+        <div class="sub">Randıman & kaliteye göre değişir</div>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <strong>⚠️ Önemli Not</strong>
+      Fiyatlar randıman, nem oranı ve bölgeye göre değişiklik gösterir. P randıman fındıkta fiyat bir kademe yukarı/aşağı 5–7,50 ₺ etki yapar. Satış öncesi yerel borsa verilerini teyit etmeniz önerilir.
+    </div>
+
+    <div class="section-label">İl Bazlı Serbest Piyasa</div>
+    <div class="tcard">
+      <div class="tcard-header">
+        <div class="tcard-icon" style="background:#EAF3DE;">🌰</div>
+        <div>
+          <div class="tcard-title">Karadeniz Bölgesi Fındık Fiyatları</div>
+          <div class="tcard-sub">Kabuklu · 50 Randıman · Mayıs 2026</div>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>İl</th>
+            <th>Fiyat Aralığı</th>
+            <th>Durum</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="td-name">Giresun</td><td class="price-cell">215 – 240 ₺</td><td><span class="badge-up">↑ Yüksek</span></td></tr>
+          <tr><td class="td-name">Ordu</td><td class="price-cell">210 – 225 ₺</td><td><span class="badge-st">→ Sabit</span></td></tr>
+          <tr><td class="td-name">Trabzon</td><td class="price-cell">218 – 235 ₺</td><td><span class="badge-up">↑ Yüksek</span></td></tr>
+          <tr><td class="td-name">Düzce</td><td class="price-cell">208 – 222 ₺</td><td><span class="badge-st">→ Sabit</span></td></tr>
+          <tr><td class="td-name">Sakarya</td><td class="price-cell">210 – 220 ₺</td><td><span class="badge-dn">↓ Düşük</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section-label">Kurum Alım Fiyatları</div>
+    <div class="tcard">
+      <div class="tcard-header">
+        <div class="tcard-icon" style="background:#E6F1FB;">🏛</div>
+        <div>
+          <div class="tcard-title">Resmi Kurum Alım Fiyatları</div>
+          <div class="tcard-sub">Mayıs 2026</div>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr><th>Kurum</th><th>Ürün</th><th>Fiyat</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="td-name">TMO</td><td>Giresun Kalite Kabuklu</td><td class="price-cell">200 ₺/kg</td></tr>
+          <tr><td class="td-name">TMO</td><td>Levant Kalite Kabuklu</td><td class="price-cell">195 ₺/kg</td></tr>
+          <tr><td class="td-name">Fiskobirlik</td><td>Giresun Kalite (İç)</td><td class="price-cell">240 ₺/kg</td></tr>
+          <tr><td class="td-name">Fiskobirlik</td><td>Çakıldak</td><td class="price-cell">210 ₺/kg</td></tr>
+          <tr><td class="td-name">Fiskobirlik</td><td>Levant Kalite</td><td class="price-cell">205 ₺/kg</td></tr>
+          <tr><td class="td-name">Tarım Kredi</td><td>Yağlı Fındık (Randımana göre)</td><td class="price-cell">320–338 ₺/kg</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section-label">Sezon Grafikleri</div>
+    <div class="chart-wrap">
+      <div class="chart-title">Eylül 2025 – Mayıs 2026 Fiyat Seyri (₺/kg, serbest piyasa ortalama)</div>
+      <div class="bar-chart" id="findik-chart"></div>
+    </div>
+
+  </div>
+
+  <!-- ───── ÇAY ───── -->
+  <div id="tab-cay" style="display:none;">
+
+    <div class="big-cards">
+      <div class="big-card" style="--accent:#1B4D2E">
+        <span class="trend">🍃</span>
+        <div class="source">ÇAYKUR (Resmi)</div>
+        <div class="label">Yaş Çay Alım Fiyatı</div>
+        <div class="price">35 <span>₺/kg</span></div>
+        <div class="sub">Tarım Bakanlığı · Mayıs 2026</div>
+      </div>
+      <div class="big-card" style="--accent:#3A7D44">
+        <span class="trend">📈</span>
+        <div class="source">Market (Kuru Çay)</div>
+        <div class="label">Ortalama 1 kg Kuru Çay</div>
+        <div class="price">280<span style="font-size:14px">–320</span> <span>₺</span></div>
+        <div class="sub">Nisan 2026 · %10 zam sonrası</div>
+      </div>
+      <div class="big-card" style="--accent:#7dba84">
+        <span class="trend">⬆️</span>
+        <div class="source">ÇAYKUR Zammı</div>
+        <div class="label">Nisan 2026 Fiyat Artışı</div>
+        <div class="price">%10</div>
+        <div class="sub">8 Nisan 2026 itibarıyla geçerli</div>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <strong>📌 Bilgi</strong>
+      ÇAYKUR, 8 Nisan 2026 itibarıyla tüm kuru çay ürünlerine ortalama %10 zam uyguladı. 2026 yaş çay kampanyasında alım fiyatı 35 ₺/kg olarak belirlendi.
+    </div>
+
+    <div class="section-label">Marka Bazlı Kuru Çay Fiyatları (1 kg)</div>
+    <div class="tcard">
+      <div class="tcard-header">
+        <div class="tcard-icon" style="background:#E8F5E9;">🍵</div>
+        <div>
+          <div class="tcard-title">Market Güncel Fiyatları</div>
+          <div class="tcard-sub">Mayıs 2026 · 1 kg</div>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr><th>Marka / Ürün</th><th>Fiyat Aralığı</th><th>Durum</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="td-name">Çaykur Filiz</td><td class="price-cell">320 – 330 ₺</td><td><span class="badge-up">↑ Zamlandı</span></td></tr>
+          <tr><td class="td-name">Çaykur Tiryaki</td><td class="price-cell">295 – 300 ₺</td><td><span class="badge-up">↑ Zamlandı</span></td></tr>
+          <tr><td class="td-name">Çaykur Rize Turist</td><td class="price-cell">280 – 300 ₺</td><td><span class="badge-up">↑ Zamlandı</span></td></tr>
+          <tr><td class="td-name">Lipton Yellow Label</td><td class="price-cell">300 – 320 ₺</td><td><span class="badge-up">↑ Yüksek</span></td></tr>
+          <tr><td class="td-name">Doğuş Çay</td><td class="price-cell">250 – 270 ₺</td><td><span class="badge-st">→ Sabit</span></td></tr>
+          <tr><td class="td-name">Ofçay Filiz</td><td class="price-cell">190 – 220 ₺</td><td><span class="badge-dn">↓ Uygun</span></td></tr>
+          <tr><td class="td-name">Market Markaları</td><td class="price-cell">180 – 200 ₺</td><td><span class="badge-dn">↓ En Uygun</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section-label">Fiyat Karşılaştırma</div>
+    <div class="chart-wrap">
+      <div class="chart-title">Marka Bazlı 1 kg Kuru Çay Fiyatı (₺)</div>
+      <div class="bar-chart" id="cay-chart"></div>
+    </div>
+
+  </div>
+
+  <div class="page-footer">
+    Veriler TMO, Fiskobirlik, Çaykur ve ticaret borsası açıklamalarından derlenmiştir.<br>
+    Fiyatlar bilgi amaçlıdır, satış öncesi güncel verileri teyit ediniz.
+  </div>
+
+</div>
+
+<script>
+// Güncelleme zamanı
+const now = new Date();
+document.getElementById('update-time').textContent =
+  'Son güncelleme: ' + now.toLocaleDateString('tr-TR') + ' · Mayıs 2026 verileri';
+
+// Tabs
+function showTab(tab, btn) {
+  document.getElementById('tab-findik').style.display = tab === 'findik' ? '' : 'none';
+  document.getElementById('tab-cay').style.display = tab === 'cay' ? '' : 'none';
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// Fındık sezon grafiği
+const findikData = [
+  { ay: 'Eylül 25', fiyat: 340 },
+  { ay: 'Ekim 25',  fiyat: 310 },
+  { ay: 'Kas 25',   fiyat: 295 },
+  { ay: 'Ara 25',   fiyat: 290 },
+  { ay: 'Oca 26',   fiyat: 285 },
+  { ay: 'Şub 26',   fiyat: 275 },
+  { ay: 'Mar 26',   fiyat: 215 },
+  { ay: 'Nis 26',   fiyat: 220 },
+  { ay: 'May 26',   fiyat: 228 },
+];
+const maxF = Math.max(...findikData.map(d => d.fiyat));
+const fc = document.getElementById('findik-chart');
+findikData.forEach(d => {
+  const pct = Math.round((d.fiyat / maxF) * 100);
+  fc.innerHTML += `
+    <div class="bar-row">
+      <span class="bar-label">${d.ay}</span>
+      <div class="bar-track">
+        <div class="bar-fill" style="width:${pct}%;background:#1B4D2E;">${d.fiyat > 270 ? d.fiyat + '₺' : ''}</div>
+      </div>
+      <span class="bar-val">${d.fiyat} ₺</span>
+    </div>`;
+});
+
+// Çay grafik
+const cayData = [
+  { marka: 'Çaykur Filiz', fiyat: 325 },
+  { marka: 'Lipton',       fiyat: 310 },
+  { marka: 'Çaykur Tiryaki', fiyat: 298 },
+  { marka: 'Çaykur Rize', fiyat: 290 },
+  { marka: 'Doğuş',       fiyat: 260 },
+  { marka: 'Ofçay',       fiyat: 205 },
+  { marka: 'Market Mark.', fiyat: 190 },
+];
+const maxC = Math.max(...cayData.map(d => d.fiyat));
+const cc = document.getElementById('cay-chart');
+cayData.forEach(d => {
+  const pct = Math.round((d.fiyat / maxC) * 100);
+  cc.innerHTML += `
+    <div class="bar-row">
+      <span class="bar-label">${d.marka}</span>
+      <div class="bar-track">
+        <div class="bar-fill" style="width:${pct}%;background:#3A7D44;"></div>
+      </div>
+      <span class="bar-val">${d.fiyat} ₺</span>
+    </div>`;
+});
+</script>
+</body>
+</html>

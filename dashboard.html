@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sipariş Paneli – Giresun Yöresel</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #F0F4EF; color: #1a1a1a; min-height: 100vh; }
+
+  /* LOGIN */
+  #login-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: linear-gradient(135deg, #0F2D1A 0%, #1B4D2E 100%); }
+  .login-card { background: #fff; border-radius: 16px; padding: 44px 40px; width: 100%; max-width: 360px; box-shadow: 0 20px 60px rgba(0,0,0,.25); }
+  .login-logo { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+  .login-logo img { height: 48px; width: auto; }
+  .login-logo-text { font-size: 18px; font-weight: 700; color: #0F2D1A; line-height: 1.2; }
+  .login-logo-text span { color: #3A7D44; display: block; font-size: 13px; font-weight: 500; }
+  .login-card p { font-size: 13px; color: #888; margin-bottom: 28px; margin-top: 6px; }
+  .login-card input { width: 100%; padding: 11px 14px; border: 1.5px solid #D0D8CE; border-radius: 8px; font-size: 14px; margin-bottom: 12px; background: #F4F7F2; transition: border-color .2s; }
+  .login-card input:focus { outline: none; border-color: #1B4D2E; }
+  .btn-login { width: 100%; padding: 12px; background: #1B4D2E; color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background .2s; }
+  .btn-login:hover { background: #0F2D1A; }
+  .login-error { font-size: 13px; color: #C0392B; margin-top: 8px; display: none; }
+
+  /* DASHBOARD */
+  #dashboard { display: none; }
+  .topbar { background: #fff; border-bottom: 1px solid #DDE5DA; padding: 0 24px; height: 58px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+  .topbar-brand { display: flex; align-items: center; gap: 10px; }
+  .topbar-brand img { height: 32px; width: auto; }
+  .topbar-brand span { font-size: 14px; font-weight: 600; color: #1a1a1a; }
+  .topbar-brand span em { color: #3A7D44; font-style: normal; }
+  .topbar-right { display: flex; align-items: center; gap: 10px; }
+  .refresh-btn { background: none; border: 1px solid #C8D4C4; border-radius: 8px; padding: 6px 14px; font-size: 13px; cursor: pointer; color: #555; }
+  .refresh-btn:hover { background: #F0F4EF; }
+  .logout-btn { background: none; border: none; font-size: 13px; color: #888; cursor: pointer; }
+
+  .main { padding: 24px; max-width: 1200px; margin: 0 auto; }
+
+  /* STATS */
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 24px; }
+  .stat-card { background: #fff; border: 1px solid #DDE5DA; border-radius: 12px; padding: 16px 18px; }
+  .stat-label { font-size: 12px; color: #888; margin-bottom: 6px; }
+  .stat-value { font-size: 28px; font-weight: 700; color: #1a1a1a; }
+  .stat-value.green { color: #1B4D2E; }
+  .stat-value.amber { color: #B8820A; }
+
+  /* FILTERS */
+  .filters { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+  .filters input { padding: 8px 12px; border: 1px solid #C8D4C4; border-radius: 8px; font-size: 13px; background: #fff; width: 220px; }
+  .filters input:focus { outline: none; border-color: #1B4D2E; }
+  .filters select { padding: 8px 10px; border: 1px solid #C8D4C4; border-radius: 8px; font-size: 13px; background: #fff; cursor: pointer; }
+
+  /* TABLE */
+  .table-wrap { background: #fff; border: 1px solid #DDE5DA; border-radius: 12px; overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; }
+  thead { background: #F0F4EF; }
+  th { padding: 11px 16px; text-align: left; font-size: 11px; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: .06em; border-bottom: 1px solid #DDE5DA; }
+  td { padding: 14px 16px; font-size: 13.5px; border-bottom: 1px solid #EEF2EC; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr.order-row { cursor: pointer; transition: background .15s; }
+  tr.order-row:hover td { background: #F7FAF6; }
+  .td-name { font-weight: 600; color: #0F2D1A; }
+  .td-contact { color: #3A7D44; font-size: 12.5px; margin-top: 2px; }
+  .td-date { color: #888; white-space: nowrap; font-size: 12px; }
+
+  /* STATUS */
+  .status-wrap { position: relative; display: inline-block; }
+  .status-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; user-select: none; white-space: nowrap; }
+  .status-Yeni { background: #E8F5E9; color: #1B4D2E; }
+  .status-Görüşüldü { background: #FFF8E1; color: #B8820A; }
+  .status-Tamamlandı { background: #E3F2FD; color: #0C447C; }
+  .status-İptal { background: #FFEBEE; color: #C0392B; }
+  .status-dropdown {
+    display: none; position: absolute; bottom: calc(100% + 6px); left: 0;
+    background: #fff; border: 1px solid #C8D4C4; border-radius: 10px;
+    z-index: 300; min-width: 150px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.12); overflow: hidden;
+  }
+  .status-dropdown.open { display: block; }
+  .status-option { padding: 10px 14px; font-size: 13px; cursor: pointer; color: #333; display: flex; align-items: center; gap: 8px; }
+  .status-option:hover { background: #F0F4EF; }
+  .s-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  /* DETAIL PANEL */
+  .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 400; }
+  .overlay.open { display: block; }
+  .detail-panel {
+    position: fixed; top: 0; right: -480px; width: 460px; max-width: 95vw;
+    height: 100vh; background: #fff; z-index: 500;
+    box-shadow: -8px 0 40px rgba(0,0,0,.15);
+    transition: right .3s cubic-bezier(.4,0,.2,1);
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  .detail-panel.open { right: 0; }
+  .panel-header { padding: 20px 20px 16px; border-bottom: 1px solid #EEF2EC; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+  .panel-title { font-size: 16px; font-weight: 700; color: #0F2D1A; }
+  .panel-close { background: none; border: none; font-size: 20px; cursor: pointer; color: #888; line-height: 1; padding: 4px; border-radius: 6px; }
+  .panel-close:hover { background: #F0F4EF; color: #333; }
+  .panel-body { flex: 1; overflow-y: auto; padding: 20px; }
+  .panel-footer { padding: 16px 20px; border-top: 1px solid #EEF2EC; flex-shrink: 0; }
+
+  .info-row { display: flex; gap: 8px; margin-bottom: 12px; align-items: flex-start; }
+  .info-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: #888; min-width: 90px; padding-top: 2px; }
+  .info-val { font-size: 13.5px; color: #1a1a1a; line-height: 1.5; }
+
+  .panel-section-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #3A7D44; margin: 20px 0 10px; }
+
+  .notes-area { width: 100%; border: 1.5px solid #C8D4C4; border-radius: 10px; padding: 12px 14px; font-size: 13.5px; font-family: inherit; resize: vertical; min-height: 120px; color: #1a1a1a; background: #F4F7F2; line-height: 1.6; transition: border-color .2s; }
+  .notes-area:focus { outline: none; border-color: #1B4D2E; background: #fff; }
+
+  .save-note-btn { width: 100%; padding: 11px; background: #1B4D2E; color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background .2s; }
+  .save-note-btn:hover { background: #0F2D1A; }
+  .save-note-btn.saved { background: #3A7D44; }
+
+  .note-history { margin-top: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .note-item { background: #F4F7F2; border-radius: 8px; padding: 10px 12px; font-size: 13px; color: #333; line-height: 1.55; }
+  .note-item-date { font-size: 11px; color: #888; margin-bottom: 4px; }
+
+  .empty-state { text-align: center; padding: 60px 20px; color: #888; font-size: 14px; }
+  .loading-row td { text-align: center; padding: 40px; color: #888; font-size: 14px; }
+
+  @media (max-width: 640px) {
+    .main { padding: 14px; }
+    th:nth-child(3), td:nth-child(3) { display: none; }
+    .detail-panel { width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <img src="logo.png" alt="Giresun Yöresel">
+      <div class="login-logo-text">Giresun Yöresel<span>Sipariş Paneli</span></div>
+    </div>
+    <p>Panele erişmek için şifrenizi girin.</p>
+    <input type="password" id="pw-input" placeholder="Şifre" autocomplete="current-password">
+    <button class="btn-login" onclick="doLogin()">Giriş Yap</button>
+    <p class="login-error" id="login-error">Şifre hatalı, tekrar deneyin.</p>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+  <div class="topbar">
+    <div class="topbar-brand">
+      <img src="logo.png" alt="logo">
+      <span>Giresun <em>Yöresel</em> · Sipariş Paneli</span>
+    </div>
+    <div class="topbar-right">
+      <button class="refresh-btn" onclick="loadOrders()">↻ Yenile</button>
+      <button class="logout-btn" onclick="doLogout()">Çıkış</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-label">Toplam Sipariş</div><div class="stat-value" id="stat-total">—</div></div>
+      <div class="stat-card"><div class="stat-label">Yeni</div><div class="stat-value green" id="stat-new">—</div></div>
+      <div class="stat-card"><div class="stat-label">Görüşüldü</div><div class="stat-value amber" id="stat-progress">—</div></div>
+      <div class="stat-card"><div class="stat-label">Tamamlandı</div><div class="stat-value" id="stat-done">—</div></div>
+    </div>
+
+    <div class="filters">
+      <input type="text" id="search-input" placeholder="Ad, ürün veya telefon ara…" oninput="renderTable()">
+      <select id="status-filter" onchange="renderTable()">
+        <option value="">Tüm durumlar</option>
+        <option>Yeni</option>
+        <option>Görüşüldü</option>
+        <option>Tamamlandı</option>
+        <option>İptal</option>
+      </select>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Müşteri</th>
+            <th>Ürün</th>
+            <th>Detay / Adres</th>
+            <th>Tarih</th>
+            <th>Durum</th>
+          </tr>
+        </thead>
+        <tbody id="orders-tbody">
+          <tr class="loading-row"><td colspan="5">Yükleniyor…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- OVERLAY + DETAIL PANEL -->
+<div class="overlay" id="overlay" onclick="closePanel()"></div>
+<div class="detail-panel" id="detail-panel">
+  <div class="panel-header">
+    <span class="panel-title" id="panel-name">Sipariş Detayı</span>
+    <button class="panel-close" onclick="closePanel()">✕</button>
+  </div>
+  <div class="panel-body">
+    <div id="panel-content"></div>
+    <div class="panel-section-title">Notlar</div>
+    <textarea class="notes-area" id="notes-input" placeholder="Bu sipariş için not ekleyin…"></textarea>
+    <div class="note-history" id="note-history"></div>
+  </div>
+  <div class="panel-footer">
+    <button class="save-note-btn" id="save-note-btn" onclick="saveNote()">Notu Kaydet</button>
+  </div>
+</div>
+
+<script>
+const SB_URL = 'https://gbmrzjomyjrzoocryggi.supabase.co';
+const SB_KEY = 'sb_publishable_o03NNtF3nD1j_Pqse9wdqg_mla0fAaj';
+const PANEL_PASSWORD = 'giresun2026';
+
+let allOrders = [];
+let openDropdown = null;
+let currentOrderId = null;
+
+// AUTH
+function doLogin() {
+  if (document.getElementById('pw-input').value === PANEL_PASSWORD) {
+    sessionStorage.setItem('gb_auth', '1');
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    loadOrders();
+  } else {
+    document.getElementById('login-error').style.display = 'block';
+  }
+}
+function doLogout() { sessionStorage.removeItem('gb_auth'); location.reload(); }
+document.getElementById('pw-input').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+if (sessionStorage.getItem('gb_auth')) {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  loadOrders();
+}
+
+// DATA
+async function loadOrders() {
+  try {
+    const res = await fetch(`${SB_URL}/rest/v1/siparisler?select=*&order=created_at.desc`, {
+      headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
+    });
+    allOrders = await res.json();
+    if (!Array.isArray(allOrders)) throw new Error();
+  } catch {
+    allOrders = demoData();
+  }
+  updateStats(); renderTable();
+}
+
+async function updateStatus(id, status) {
+  allOrders = allOrders.map(o => o.id === id ? {...o, durum: status} : o);
+  updateStats(); renderTable();
+  try {
+    await fetch(`${SB_URL}/rest/v1/siparisler?id=eq.${id}`, {
+      method: 'PATCH',
+      headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ durum: status })
+    });
+  } catch(e) { console.error(e); }
+  if (currentOrderId === id) openPanel(id);
+}
+
+// NOTES — localStorage ile basit saklama
+function getNotes(id) {
+  try { return JSON.parse(localStorage.getItem('notes_' + id) || '[]'); } catch { return []; }
+}
+function saveNote() {
+  const text = document.getElementById('notes-input').value.trim();
+  if (!text || !currentOrderId) return;
+  const notes = getNotes(currentOrderId);
+  notes.unshift({ text, date: new Date().toLocaleString('tr-TR') });
+  localStorage.setItem('notes_' + currentOrderId, JSON.stringify(notes));
+  document.getElementById('notes-input').value = '';
+  const btn = document.getElementById('save-note-btn');
+  btn.textContent = 'Kaydedildi ✓'; btn.classList.add('saved');
+  setTimeout(() => { btn.textContent = 'Notu Kaydet'; btn.classList.remove('saved'); }, 1500);
+  renderNotes(currentOrderId);
+}
+function renderNotes(id) {
+  const notes = getNotes(id);
+  const el = document.getElementById('note-history');
+  el.innerHTML = notes.map(n => `<div class="note-item"><div class="note-item-date">${n.date}</div>${esc(n.text)}</div>`).join('') || '';
+}
+
+// PANEL
+function openPanel(id) {
+  const o = allOrders.find(x => x.id === id);
+  if (!o) return;
+  currentOrderId = id;
+  const date = o.created_at ? new Date(o.created_at).toLocaleString('tr-TR') : '—';
+  const durum = o.durum || 'Yeni';
+  document.getElementById('panel-name').textContent = o.ad_soyad;
+  document.getElementById('panel-content').innerHTML = `
+    <div class="info-row"><span class="info-label">İletişim</span><span class="info-val" style="color:#1B4D2E;font-weight:500;">${esc(o.telefon_email)}</span></div>
+    <div class="info-row"><span class="info-label">Ürün</span><span class="info-val">${esc(o.urun)}</span></div>
+    <div class="info-row"><span class="info-label">Detay</span><span class="info-val">${esc(o.detay || '—')}</span></div>
+    <div class="info-row"><span class="info-label">Tarih</span><span class="info-val">${date}</span></div>
+    <div class="info-row"><span class="info-label">Durum</span><span class="info-val">
+      <span class="status-badge status-${durum}">${durum}</span>
+    </span></div>
+    <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
+      ${['Yeni','Görüşüldü','Tamamlandı','İptal'].map(s =>
+        `<button onclick="updateStatus('${o.id}','${s}')" style="padding:6px 14px;border-radius:20px;border:1.5px solid #C8D4C4;background:${s===durum?'#1B4D2E':'#fff'};color:${s===durum?'#fff':'#333'};font-size:12px;font-weight:600;cursor:pointer;">${s}</button>`
+      ).join('')}
+    </div>`;
+  renderNotes(id);
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('detail-panel').classList.add('open');
+}
+function closePanel() {
+  document.getElementById('overlay').classList.remove('open');
+  document.getElementById('detail-panel').classList.remove('open');
+  currentOrderId = null;
+}
+
+// RENDER
+function updateStats() {
+  document.getElementById('stat-total').textContent = allOrders.length;
+  document.getElementById('stat-new').textContent = allOrders.filter(o => o.durum === 'Yeni').length;
+  document.getElementById('stat-progress').textContent = allOrders.filter(o => o.durum === 'Görüşüldü').length;
+  document.getElementById('stat-done').textContent = allOrders.filter(o => o.durum === 'Tamamlandı').length;
+}
+
+function renderTable() {
+  const search = document.getElementById('search-input').value.toLowerCase();
+  const sf = document.getElementById('status-filter').value;
+  const filtered = allOrders.filter(o => {
+    const m = !search || [o.ad_soyad, o.urun, o.telefon_email].some(v => (v||'').toLowerCase().includes(search));
+    return m && (!sf || o.durum === sf);
+  });
+  const tbody = document.getElementById('orders-tbody');
+  if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:40px;color:#888;">Sipariş bulunamadı.</td></tr>'; return; }
+  tbody.innerHTML = filtered.map(o => {
+    const date = o.created_at ? new Date(o.created_at).toLocaleString('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
+    const durum = o.durum || 'Yeni';
+    return `<tr class="order-row" onclick="openPanel('${o.id}')">
+      <td><div class="td-name">${esc(o.ad_soyad)}</div><div class="td-contact">${esc(o.telefon_email)}</div></td>
+      <td>${esc(o.urun)}</td>
+      <td style="color:#666;font-size:13px;max-width:200px;">${esc(o.detay||'—')}</td>
+      <td class="td-date">${date}</td>
+      <td onclick="event.stopPropagation()">
+        <div class="status-wrap">
+          <span class="status-badge status-${durum}" onclick="toggleDropdown(event,'${o.id}')">${durum} ▾</span>
+          <div class="status-dropdown" id="dd-${o.id}">
+            ${[['Yeni','#1B4D2E'],['Görüşüldü','#B8820A'],['Tamamlandı','#0C447C'],['İptal','#C0392B']].map(([s,c])=>
+              `<div class="status-option" onclick="changeStatus('${o.id}','${s}')"><span class="s-dot" style="background:${c}"></span>${s}</div>`
+            ).join('')}
+          </div>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function toggleDropdown(e, id) {
+  e.stopPropagation();
+  if (openDropdown && openDropdown !== id) document.getElementById('dd-'+openDropdown)?.classList.remove('open');
+  document.getElementById('dd-'+id)?.classList.toggle('open');
+  openDropdown = document.getElementById('dd-'+id)?.classList.contains('open') ? id : null;
+}
+function changeStatus(id, status) {
+  if (openDropdown) { document.getElementById('dd-'+openDropdown)?.classList.remove('open'); openDropdown = null; }
+  updateStatus(id, status);
+}
+document.addEventListener('click', () => {
+  if (openDropdown) { document.getElementById('dd-'+openDropdown)?.classList.remove('open'); openDropdown = null; }
+});
+
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function demoData() {
+  return [
+    { id:'1', ad_soyad:'Ayşe Kaya', telefon_email:'0532 111 22 33', urun:'Fındık İçi', detay:'500g, İstanbul Kadıköy', durum:'Yeni', created_at: new Date().toISOString() },
+    { id:'2', ad_soyad:'Mehmet Demir', telefon_email:'mehmet@gmail.com', urun:'Fındık Ezmesi', detay:'2 adet, fatura kesilsin', durum:'Görüşüldü', created_at: new Date(Date.now()-3600000).toISOString() },
+    { id:'3', ad_soyad:'Fatma Yılmaz', telefon_email:'0544 333 44 55', urun:'Kara Lahana', detay:'Kurutulmuş 1kg, Ankara', durum:'Tamamlandı', created_at: new Date(Date.now()-86400000).toISOString() },
+  ];
+}
+</script>
+</body>
+</html>
