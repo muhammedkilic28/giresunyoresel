@@ -2,7 +2,6 @@ const CACHE = 'giresunyoresel-v1';
 const ASSETS = [
   '/',
   '/index.html',
-  '/fiyatlar.html',
   '/logo.png',
   '/reklam.jpg',
   '/hero-video.mp4',

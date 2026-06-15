@@ -36,6 +36,35 @@
 
   .main { padding: 24px; max-width: 1200px; margin: 0 auto; }
 
+  /* DASH TABS */
+  .dash-tabs { display: flex; gap: 8px; padding: 16px 24px 0; max-width: 1200px; margin: 0 auto; }
+  .dash-tab { padding: 9px 18px; border-radius: 10px 10px 0 0; border: 1px solid #DDE5DA; border-bottom: none; background: #EEF2EC; font-size: 13px; font-weight: 600; color: #666; cursor: pointer; transition: all .15s; }
+  .dash-tab.active { background: #fff; color: #1B4D2E; }
+  .dash-tab:hover:not(.active) { background: #F7FAF6; }
+
+  /* ÜRÜN LİSTESİ */
+  .tcard { background: #fff; border: 1px solid #DDE5DA; border-radius: 14px; overflow: hidden; }
+  .tcard-header { padding: 16px 20px; border-bottom: 1px solid #EEF2EC; }
+  .tcard-title { font-size: 15px; font-weight: 700; color: #0F2D1A; }
+  .tcard-sub { font-size: 12.5px; color: #888; margin-top: 4px; }
+  .urun-list { display: flex; flex-direction: column; }
+  .urun-row { display: flex; align-items: center; gap: 14px; padding: 14px 20px; border-bottom: 1px solid #F0EDE7; }
+  .urun-row:last-child { border-bottom: none; }
+  .urun-row:hover { background: #FAFBF9; }
+  .urun-thumb { width: 48px; height: 48px; border-radius: 8px; object-fit: cover; flex-shrink: 0; background: #EEF2EC; }
+  .urun-name { font-size: 14px; font-weight: 600; color: #0F2D1A; flex: 1; min-width: 120px; }
+  .urun-field { display: flex; flex-direction: column; gap: 4px; }
+  .urun-field label { font-size: 11px; color: #888; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+  .urun-field input { padding: 8px 10px; border: 1.5px solid #C8D4C4; border-radius: 8px; font-size: 13px; width: 120px; transition: border-color .2s; }
+  .urun-field input:focus { outline: none; border-color: #1B4D2E; }
+  .urun-save { background: #1B4D2E; color: #fff; border: none; border-radius: 8px; padding: 9px 18px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background .2s; flex-shrink: 0; }
+  .urun-save:hover { background: #0F2D1A; }
+  .urun-save.saved { background: #3A7D44; }
+  @media (max-width: 700px) {
+    .urun-row { flex-wrap: wrap; }
+    .urun-name { width: 100%; }
+  }
+
   /* STATS */
   .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 24px; }
   .stat-card { background: #fff; border: 1px solid #DDE5DA; border-radius: 12px; padding: 16px 18px; }
@@ -51,8 +80,8 @@
   .filters select { padding: 8px 10px; border: 1px solid #C8D4C4; border-radius: 8px; font-size: 13px; background: #fff; cursor: pointer; }
 
   /* TABLE */
-  .table-wrap { background: #fff; border: 1px solid #DDE5DA; border-radius: 12px; overflow: hidden; }
-  table { width: 100%; border-collapse: collapse; }
+  .table-wrap { background: #fff; border: 1px solid #DDE5DA; border-radius: 12px; overflow: visible; }
+  table { width: 100%; border-collapse: collapse; border-radius: 12px; overflow: hidden; display: table; }
   thead { background: #F0F4EF; }
   th { padding: 11px 16px; text-align: left; font-size: 11px; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: .06em; border-bottom: 1px solid #DDE5DA; }
   td { padding: 14px 16px; font-size: 13.5px; border-bottom: 1px solid #EEF2EC; vertical-align: top; }
@@ -71,10 +100,10 @@
   .status-Tamamlandı { background: #E3F2FD; color: #0C447C; }
   .status-İptal { background: #FFEBEE; color: #C0392B; }
   .status-dropdown {
-    display: none; position: absolute; bottom: calc(100% + 6px); left: 0;
+    display: none; position: fixed;
     background: #fff; border: 1px solid #C8D4C4; border-radius: 10px;
-    z-index: 300; min-width: 150px;
-    box-shadow: 0 8px 24px rgba(0,0,0,.12); overflow: hidden;
+    z-index: 9999; min-width: 150px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.15); overflow: hidden;
   }
   .status-dropdown.open { display: block; }
   .status-option { padding: 10px 14px; font-size: 13px; cursor: pointer; color: #333; display: flex; align-items: center; gap: 8px; }
@@ -148,7 +177,7 @@
   <div class="topbar">
     <div class="topbar-brand">
       <img src="logo.png" alt="logo">
-      <span>Giresun <em>Yöresel</em> · Sipariş Paneli</span>
+      <span>Giresun <em>Yöresel</em> · Panel</span>
     </div>
     <div class="topbar-right">
       <button class="refresh-btn" onclick="loadOrders()">↻ Yenile</button>
@@ -156,7 +185,12 @@
     </div>
   </div>
 
-  <div class="main">
+  <div class="dash-tabs">
+    <button class="dash-tab active" onclick="showDashTab('siparisler', this)">📦 Siparişler</button>
+    <button class="dash-tab" onclick="showDashTab('urunler', this)">🏷️ Ürün Fiyatları</button>
+  </div>
+
+  <div class="main" id="tab-siparisler">
     <div class="stats-grid">
       <div class="stat-card"><div class="stat-label">Toplam Sipariş</div><div class="stat-value" id="stat-total">—</div></div>
       <div class="stat-card"><div class="stat-label">Yeni</div><div class="stat-value green" id="stat-new">—</div></div>
@@ -190,6 +224,19 @@
           <tr class="loading-row"><td colspan="5">Yükleniyor…</td></tr>
         </tbody>
       </table>
+    </div>
+  </div>
+
+  <!-- ÜRÜN FİYATLARI TAB -->
+  <div class="main" id="tab-urunler" style="display:none;">
+    <div class="tcard">
+      <div class="tcard-header">
+        <div class="tcard-title">Ürün Fiyat & Gramaj Yönetimi</div>
+        <div class="tcard-sub">Buradan girdiğiniz fiyat ve gramaj bilgileri sitenizde anlık olarak görünür.</div>
+      </div>
+      <div id="urun-list" class="urun-list">
+        <div class="loading-row" style="padding:40px;text-align:center;color:#888;">Yükleniyor…</div>
+      </div>
     </div>
   </div>
 </div>
@@ -228,6 +275,7 @@ function doLogin() {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('dashboard').style.display = 'block';
     loadOrders();
+    loadUrunler();
   } else {
     document.getElementById('login-error').style.display = 'block';
   }
@@ -238,6 +286,96 @@ if (sessionStorage.getItem('gb_auth')) {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('dashboard').style.display = 'block';
   loadOrders();
+  loadUrunler();
+}
+
+// TABS
+function showDashTab(tab, btn) {
+  document.getElementById('tab-siparisler').style.display = tab === 'siparisler' ? '' : 'none';
+  document.getElementById('tab-urunler').style.display = tab === 'urunler' ? '' : 'none';
+  document.querySelectorAll('.dash-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// ÜRÜN FİYATLARI
+const URUN_LIST = [
+  { id: 'findik-ici',     ad: 'Giresun Fındık İçi',          img: 'urun-findik-ici.jpg' },
+  { id: 'findik-ezmesi',  ad: 'Fındık Ezmesi',               img: 'urun-findik-ezmesi.jpg' },
+  { id: 'kabuklu-findik', ad: 'Kabuklu Fındık',              img: 'urun-kabuklu-findik.jpg' },
+  { id: 'kara-lahana',    ad: 'Yöresel Kara Lahana',         img: 'urun-kara-lahana.jpg' },
+  { id: 'fasulye',        ad: 'Fırında Kurutulmuş Fasulye',  img: 'urun-fasulye.jpg' },
+  { id: 'misir-ekmegi',   ad: 'Mısır Ekmeği',                img: 'urun-misir-ekmegi.jpg' },
+  { id: 'misir',          ad: 'Yöresel Mısır',               img: 'urun-misir.jpg' },
+];
+
+async function loadUrunler() {
+  let data = [];
+  try {
+    const res = await fetch(`${SB_URL}/rest/v1/urunler?select=*`, {
+      headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
+    });
+    data = await res.json();
+    if (!Array.isArray(data)) data = [];
+  } catch { data = []; }
+
+  const map = {};
+  data.forEach(u => map[u.urun_id] = u);
+
+  const list = document.getElementById('urun-list');
+  list.innerHTML = URUN_LIST.map(p => {
+    const u = map[p.id] || {};
+    return `
+    <div class="urun-row">
+      <img class="urun-thumb" src="${p.img}" alt="${p.ad}">
+      <div class="urun-name">${p.ad}</div>
+      <div class="urun-field">
+        <label>Gramaj</label>
+        <input type="text" id="gramaj-${p.id}" placeholder="örn: 500g" value="${u.gramaj || ''}">
+      </div>
+      <div class="urun-field">
+        <label>Fiyat (₺)</label>
+        <input type="text" id="fiyat-${p.id}" placeholder="örn: 250" value="${u.fiyat || ''}">
+      </div>
+      <button class="urun-save" id="save-${p.id}" onclick="saveUrun('${p.id}')">Kaydet</button>
+    </div>`;
+  }).join('');
+}
+
+async function saveUrun(pid) {
+  const gramaj = document.getElementById('gramaj-' + pid).value.trim();
+  const fiyat = document.getElementById('fiyat-' + pid).value.trim();
+  const btn = document.getElementById('save-' + pid);
+  btn.textContent = 'Kaydediliyor…';
+
+  try {
+    // Önce var mı kontrol et
+    const check = await fetch(`${SB_URL}/rest/v1/urunler?urun_id=eq.${pid}&select=urun_id`, {
+      headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
+    });
+    const existing = await check.json();
+
+    if (Array.isArray(existing) && existing.length > 0) {
+      // Güncelle
+      await fetch(`${SB_URL}/rest/v1/urunler?urun_id=eq.${pid}`, {
+        method: 'PATCH',
+        headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ gramaj, fiyat })
+      });
+    } else {
+      // Ekle
+      await fetch(`${SB_URL}/rest/v1/urunler`, {
+        method: 'POST',
+        headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ urun_id: pid, gramaj, fiyat })
+      });
+    }
+    btn.textContent = 'Kaydedildi ✓';
+    btn.classList.add('saved');
+    setTimeout(() => { btn.textContent = 'Kaydet'; btn.classList.remove('saved'); }, 1500);
+  } catch (e) {
+    btn.textContent = 'Hata!';
+    setTimeout(() => btn.textContent = 'Kaydet', 1500);
+  }
 }
 
 // DATA
@@ -361,9 +499,32 @@ function renderTable() {
 
 function toggleDropdown(e, id) {
   e.stopPropagation();
-  if (openDropdown && openDropdown !== id) document.getElementById('dd-'+openDropdown)?.classList.remove('open');
-  document.getElementById('dd-'+id)?.classList.toggle('open');
-  openDropdown = document.getElementById('dd-'+id)?.classList.contains('open') ? id : null;
+  if (openDropdown && openDropdown !== id) {
+    const prev = document.getElementById('dd-'+openDropdown);
+    if (prev) prev.classList.remove('open');
+  }
+  const dd = document.getElementById('dd-'+id);
+  if (!dd) return;
+  if (dd.classList.contains('open')) {
+    dd.classList.remove('open');
+    openDropdown = null;
+    return;
+  }
+  // Fixed pozisyon hesapla
+  const badge = e.currentTarget;
+  const rect = badge.getBoundingClientRect();
+  const spaceBelow = window.innerHeight - rect.bottom;
+  const ddHeight = 170;
+  if (spaceBelow < ddHeight) {
+    // Yukarı aç
+    dd.style.top = (rect.top - ddHeight - 4) + 'px';
+  } else {
+    // Aşağı aç
+    dd.style.top = (rect.bottom + 4) + 'px';
+  }
+  dd.style.left = rect.left + 'px';
+  dd.classList.add('open');
+  openDropdown = id;
 }
 function changeStatus(id, status) {
   if (openDropdown) { document.getElementById('dd-'+openDropdown)?.classList.remove('open'); openDropdown = null; }
