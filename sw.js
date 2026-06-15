@@ -6,7 +6,14 @@ const ASSETS = [
   '/logo.png',
   '/reklam.jpg',
   '/hero-video.mp4',
-  '/manifest.json'
+  '/manifest.json',
+  '/urun-findik-ici.jpg',
+  '/urun-findik-ezmesi.jpg',
+  '/urun-kabuklu-findik.jpg',
+  '/urun-kara-lahana.jpg',
+  '/urun-fasulye.jpg',
+  '/urun-misir-ekmegi.jpg',
+  '/urun-misir.jpg'
 ];
 
 // Kurulum — dosyaları önbelleğe al
