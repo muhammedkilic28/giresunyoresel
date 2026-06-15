@@ -48,21 +48,27 @@
   .tcard-title { font-size: 15px; font-weight: 700; color: #0F2D1A; }
   .tcard-sub { font-size: 12.5px; color: #888; margin-top: 4px; }
   .urun-list { display: flex; flex-direction: column; }
-  .urun-row { display: flex; align-items: center; gap: 14px; padding: 14px 20px; border-bottom: 1px solid #F0EDE7; }
-  .urun-row:last-child { border-bottom: none; }
-  .urun-row:hover { background: #FAFBF9; }
-  .urun-thumb { width: 48px; height: 48px; border-radius: 8px; object-fit: cover; flex-shrink: 0; background: #EEF2EC; }
-  .urun-name { font-size: 14px; font-weight: 600; color: #0F2D1A; flex: 1; min-width: 120px; }
+  .urun-block { padding: 16px 20px; border-bottom: 1px solid #F0EDE7; }
+  .urun-block:last-child { border-bottom: none; }
+  .urun-block-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .urun-thumb { width: 44px; height: 44px; border-radius: 8px; object-fit: cover; flex-shrink: 0; background: #EEF2EC; }
+  .urun-name { font-size: 14px; font-weight: 700; color: #0F2D1A; }
+  .varyant-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
+  .no-varyant { font-size: 12.5px; color: #aaa; padding: 4px 0; }
+  .varyant-row { display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap; background: #FAFBF9; border: 1px solid #EEF2EC; border-radius: 10px; padding: 10px 12px; }
+  .varyant-row.new-row { background: #F4F7F2; border: 1.5px dashed #C8D4C4; }
   .urun-field { display: flex; flex-direction: column; gap: 4px; }
   .urun-field label { font-size: 11px; color: #888; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
-  .urun-field input { padding: 8px 10px; border: 1.5px solid #C8D4C4; border-radius: 8px; font-size: 13px; width: 120px; transition: border-color .2s; }
+  .urun-field input { padding: 8px 10px; border: 1.5px solid #C8D4C4; border-radius: 8px; font-size: 13px; width: 110px; transition: border-color .2s; }
   .urun-field input:focus { outline: none; border-color: #1B4D2E; }
-  .urun-save { background: #1B4D2E; color: #fff; border: none; border-radius: 8px; padding: 9px 18px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background .2s; flex-shrink: 0; }
-  .urun-save:hover { background: #0F2D1A; }
+  .urun-save, .urun-add { background: #1B4D2E; color: #fff; border: none; border-radius: 8px; padding: 9px 16px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background .2s; flex-shrink: 0; }
+  .urun-save:hover, .urun-add:hover { background: #0F2D1A; }
   .urun-save.saved { background: #3A7D44; }
+  .urun-del { background: none; color: #C0392B; border: 1.5px solid #F0C8C4; border-radius: 8px; padding: 9px 14px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s; flex-shrink: 0; }
+  .urun-del:hover { background: #FEECEB; }
   @media (max-width: 700px) {
-    .urun-row { flex-wrap: wrap; }
-    .urun-name { width: 100%; }
+    .varyant-row { flex-direction: column; align-items: stretch; }
+    .urun-field input { width: 100%; }
   }
 
   /* STATS */
@@ -308,73 +314,118 @@ const URUN_LIST = [
   { id: 'misir',          ad: 'Yöresel Mısır',               img: 'urun-misir.jpg' },
 ];
 
+let allVaryantlar = [];
+
 async function loadUrunler() {
-  let data = [];
   try {
-    const res = await fetch(`${SB_URL}/rest/v1/urunler?select=*`, {
+    const res = await fetch(`${SB_URL}/rest/v1/urun_varyantlar?select=*&order=sira.asc`, {
       headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
     });
-    data = await res.json();
-    if (!Array.isArray(data)) data = [];
-  } catch { data = []; }
+    allVaryantlar = await res.json();
+    if (!Array.isArray(allVaryantlar)) allVaryantlar = [];
+  } catch { allVaryantlar = []; }
 
-  const map = {};
-  data.forEach(u => map[u.urun_id] = u);
+  renderUrunler();
+}
 
+function renderUrunler() {
   const list = document.getElementById('urun-list');
   list.innerHTML = URUN_LIST.map(p => {
-    const u = map[p.id] || {};
+    const varyantlar = allVaryantlar.filter(v => v.urun_id === p.id);
+    const rows = varyantlar.map(v => `
+      <div class="varyant-row" data-id="${v.id}">
+        <div class="urun-field">
+          <label>Gramaj</label>
+          <input type="text" class="v-gramaj" placeholder="örn: 500g" value="${v.gramaj || ''}">
+        </div>
+        <div class="urun-field">
+          <label>Fiyat (₺)</label>
+          <input type="text" class="v-fiyat" placeholder="örn: 250" value="${v.fiyat || ''}">
+        </div>
+        <button class="urun-save" onclick="updateVaryant('${v.id}', this)">Güncelle</button>
+        <button class="urun-del" onclick="deleteVaryant('${v.id}', this)">Sil</button>
+      </div>`).join('');
+
     return `
-    <div class="urun-row">
-      <img class="urun-thumb" src="${p.img}" alt="${p.ad}">
-      <div class="urun-name">${p.ad}</div>
-      <div class="urun-field">
-        <label>Gramaj</label>
-        <input type="text" id="gramaj-${p.id}" placeholder="örn: 500g" value="${u.gramaj || ''}">
+    <div class="urun-block">
+      <div class="urun-block-header">
+        <img class="urun-thumb" src="${p.img}" alt="${p.ad}">
+        <div class="urun-name">${p.ad}</div>
       </div>
-      <div class="urun-field">
-        <label>Fiyat (₺)</label>
-        <input type="text" id="fiyat-${p.id}" placeholder="örn: 250" value="${u.fiyat || ''}">
+      <div class="varyant-list" id="varyantlar-${p.id}">
+        ${rows || '<div class="no-varyant">Henüz seçenek eklenmedi.</div>'}
       </div>
-      <button class="urun-save" id="save-${p.id}" onclick="saveUrun('${p.id}')">Kaydet</button>
+      <div class="varyant-row new-row" data-pid="${p.id}">
+        <div class="urun-field">
+          <label>Gramaj</label>
+          <input type="text" class="v-gramaj-new" placeholder="örn: 250g">
+        </div>
+        <div class="urun-field">
+          <label>Fiyat (₺)</label>
+          <input type="text" class="v-fiyat-new" placeholder="örn: 150">
+        </div>
+        <button class="urun-add" onclick="addVaryant('${p.id}', this)">+ Seçenek Ekle</button>
+      </div>
     </div>`;
   }).join('');
 }
 
-async function saveUrun(pid) {
-  const gramaj = document.getElementById('gramaj-' + pid).value.trim();
-  const fiyat = document.getElementById('fiyat-' + pid).value.trim();
-  const btn = document.getElementById('save-' + pid);
-  btn.textContent = 'Kaydediliyor…';
+async function addVaryant(pid, btn) {
+  const row = btn.closest('.varyant-row');
+  const gramaj = row.querySelector('.v-gramaj-new').value.trim();
+  const fiyat = row.querySelector('.v-fiyat-new').value.trim();
+  if (!gramaj || !fiyat) { alert('Lütfen gramaj ve fiyat girin.'); return; }
 
+  btn.textContent = 'Ekleniyor…';
   try {
-    // Önce var mı kontrol et
-    const check = await fetch(`${SB_URL}/rest/v1/urunler?urun_id=eq.${pid}&select=urun_id`, {
-      headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
+    await fetch(`${SB_URL}/rest/v1/urun_varyantlar`, {
+      method: 'POST',
+      headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ urun_id: pid, gramaj, fiyat, sira: allVaryantlar.filter(v=>v.urun_id===pid).length })
     });
-    const existing = await check.json();
+    await loadUrunler();
+  } catch (e) {
+    btn.textContent = '+ Seçenek Ekle';
+    alert('Hata oluştu, tekrar deneyin.');
+  }
+}
 
-    if (Array.isArray(existing) && existing.length > 0) {
-      // Güncelle
-      await fetch(`${SB_URL}/rest/v1/urunler?urun_id=eq.${pid}`, {
-        method: 'PATCH',
-        headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ gramaj, fiyat })
-      });
-    } else {
-      // Ekle
-      await fetch(`${SB_URL}/rest/v1/urunler`, {
-        method: 'POST',
-        headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-        body: JSON.stringify({ urun_id: pid, gramaj, fiyat })
-      });
-    }
-    btn.textContent = 'Kaydedildi ✓';
+async function updateVaryant(id, btn) {
+  const row = btn.closest('.varyant-row');
+  const gramaj = row.querySelector('.v-gramaj').value.trim();
+  const fiyat = row.querySelector('.v-fiyat').value.trim();
+  const origText = btn.textContent;
+  btn.textContent = 'Kaydediliyor…';
+  try {
+    await fetch(`${SB_URL}/rest/v1/urun_varyantlar?id=eq.${id}`, {
+      method: 'PATCH',
+      headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ gramaj, fiyat })
+    });
+    btn.textContent = 'Güncellendi ✓';
     btn.classList.add('saved');
-    setTimeout(() => { btn.textContent = 'Kaydet'; btn.classList.remove('saved'); }, 1500);
+    setTimeout(() => { btn.textContent = origText; btn.classList.remove('saved'); }, 1500);
+    // local cache güncelle
+    const v = allVaryantlar.find(x => x.id === id);
+    if (v) { v.gramaj = gramaj; v.fiyat = fiyat; }
   } catch (e) {
     btn.textContent = 'Hata!';
-    setTimeout(() => btn.textContent = 'Kaydet', 1500);
+    setTimeout(() => btn.textContent = origText, 1500);
+  }
+}
+
+async function deleteVaryant(id, btn) {
+  if (!confirm('Bu seçeneği silmek istediğinize emin misiniz?')) return;
+  btn.textContent = 'Siliniyor…';
+  try {
+    await fetch(`${SB_URL}/rest/v1/urun_varyantlar?id=eq.${id}`, {
+      method: 'DELETE',
+      headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
+    });
+    allVaryantlar = allVaryantlar.filter(v => v.id !== id);
+    renderUrunler();
+  } catch (e) {
+    btn.textContent = 'Hata!';
   }
 }
 

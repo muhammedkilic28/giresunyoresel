@@ -458,17 +458,27 @@ section { padding: 90px 80px; }
   border-radius: 20px;
 }
 .prod-price-row {
-  display: flex; align-items: baseline; justify-content: space-between;
   margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(27,77,46,.1);
 }
 .prod-price {
-  font-family: var(--serif); font-weight: 900; font-size: 1.4rem; color: var(--gold);
+  display: flex; flex-wrap: wrap; gap: 8px;
 }
-.prod-price .gramaj {
-  font-family: var(--sans); font-weight: 600; font-size: .8rem; color: var(--mist);
-  margin-left: 4px;
+.prod-price.loading { color: var(--mist); font-size: .85rem; font-weight: 600; font-family: var(--sans); display: block; }
+.price-pill {
+  display: flex; flex-direction: column; align-items: center;
+  background: rgba(58,125,68,.08);
+  border-radius: 10px;
+  padding: 6px 12px;
+  min-width: 64px;
 }
-.prod-price.loading { color: var(--mist); font-size: .85rem; font-weight: 600; font-family: var(--sans); }
+.price-pill .gramaj {
+  font-family: var(--sans); font-weight: 700; font-size: .68rem; color: var(--mist);
+  text-transform: uppercase; letter-spacing: .04em;
+}
+.price-pill .amount {
+  font-family: var(--serif); font-weight: 900; font-size: 1.05rem; color: var(--gold);
+  margin-top: 2px;
+}
 
 /* ═══════════════════════════════════
    FEATURES / WHY US
@@ -1100,19 +1110,24 @@ const SB_KEY = 'sb_publishable_o03NNtF3nD1j_Pqse9wdqg_mla0fAaj';
 async function loadProductPrices() {
   const priceEls = document.querySelectorAll('.prod-price[data-pid]');
   try {
-    const res = await fetch(`${SB_URL}/rest/v1/urunler?select=*`, {
+    const res = await fetch(`${SB_URL}/rest/v1/urun_varyantlar?select=*&order=sira.asc`, {
       headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
     });
     const data = await res.json();
-    const map = {};
-    (Array.isArray(data) ? data : []).forEach(u => map[u.urun_id] = u);
+    const grouped = {};
+    (Array.isArray(data) ? data : []).forEach(v => {
+      if (!grouped[v.urun_id]) grouped[v.urun_id] = [];
+      grouped[v.urun_id].push(v);
+    });
 
     priceEls.forEach(el => {
       const pid = el.dataset.pid;
-      const u = map[pid];
+      const varyantlar = grouped[pid];
       el.classList.remove('loading');
-      if (u && u.fiyat) {
-        el.innerHTML = `${u.fiyat} ₺<span class="gramaj">${u.gramaj ? '/ ' + u.gramaj : ''}</span>`;
+      if (varyantlar && varyantlar.length) {
+        el.innerHTML = varyantlar.map(v =>
+          `<span class="price-pill"><span class="gramaj">${v.gramaj}</span><span class="amount">${v.fiyat} ₺</span></span>`
+        ).join('');
       } else {
         el.style.display = 'none';
       }
