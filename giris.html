@@ -87,10 +87,10 @@
   <script>
     const SUPABASE_URL = "https://gbmrzjomyjrzoocryggi.supabase.co";
     const SUPABASE_KEY = "sb_publishable_o03NNtF3nD1j_Pqse9wdqg_mla0fAaj";
-    let supabase = null;
+    let sb = null;
     try {
       if (window.supabase) {
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
       } else {
         console.error('Supabase kütüphanesi yüklenemedi (CDN erişim sorunu olabilir).');
       }
@@ -108,8 +108,8 @@
     }
 
     // Zaten giriş yapmışsa direkt yönlendir
-    if (supabase) {
-      supabase.auth.getSession().then(({data}) => {
+    if (sb) {
+      sb.auth.getSession().then(({data}) => {
         if (data.session) {
           window.location.href = 'profilim.html';
         }
@@ -119,7 +119,7 @@
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      if (!supabase) {
+      if (!sb) {
         showMsg('Bağlantı kurulamadı, lütfen sayfayı yenileyip tekrar dener misin?', 'error');
         return;
       }
@@ -130,7 +130,7 @@
       submitBtn.disabled = true;
       submitBtn.textContent = 'Giriş yapılıyor...';
 
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password: sifre });
+      const { data, error } = await sb.auth.signInWithPassword({ email, password: sifre });
 
       if (error) {
         showMsg('E-posta veya şifre hatalı görünüyor.', 'error');

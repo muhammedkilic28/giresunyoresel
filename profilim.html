@@ -53,10 +53,10 @@
 <script>
   const SUPABASE_URL = "https://gbmrzjomyjrzoocryggi.supabase.co";
   const SUPABASE_KEY = "sb_publishable_o03NNtF3nD1j_Pqse9wdqg_mla0fAaj";
-  let supabase = null;
+  let sb = null;
   try {
     if (window.supabase) {
-      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     } else {
       console.error('Supabase kütüphanesi yüklenemedi (CDN erişim sorunu olabilir).');
     }
@@ -66,17 +66,17 @@
   const wrap = document.getElementById('wrap');
 
   async function init(){
-    if (!supabase) {
+    if (!sb) {
       wrap.innerHTML = '<div class="loading">Bağlantı kurulamadı. Sayfayı yenilemeyi dener misin? (F5)</div>';
       return;
     }
-    const { data: { session } } = await supabase.auth.getSession();
+    const { data: { session } } = await sb.auth.getSession();
     if (!session) {
       window.location.href = 'giris.html';
       return;
     }
 
-    const { data: uye, error } = await supabase
+    const { data: uye, error } = await sb
       .from('uyeler')
       .select('*')
       .eq('id', session.user.id)
@@ -133,7 +133,7 @@
   }
 
   document.getElementById('cikisBtn').addEventListener('click', async () => {
-    await supabase.auth.signOut();
+    await sb.auth.signOut();
     window.location.href = 'index.html';
   });
 

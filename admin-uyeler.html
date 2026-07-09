@@ -70,7 +70,7 @@
   const SUPABASE_KEY = "sb_publishable_o03NNtF3nD1j_Pqse9wdqg_mla0fAaj";
   const ADMIN_PASS = "giresun2026"; // mevcut dashboard.html ile aynı şifre
 
-  let supabase = null;
+  let sb = null;
   let tumUyeler = [];
 
   // Supabase istemcisini güvenli şekilde başlat.
@@ -78,7 +78,7 @@
   // bu kısmı try/catch içine aldık.
   try {
     if (window.supabase) {
-      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     } else {
       console.error('Supabase kütüphanesi yüklenemedi (CDN erişim sorunu olabilir).');
     }
@@ -99,11 +99,11 @@
   document.getElementById('pass').addEventListener('keydown', e => { if(e.key==='Enter') checkPass(); });
 
   async function loadUyeler(){
-    if (!supabase) {
+    if (!sb) {
       document.getElementById('tbody').innerHTML = `<tr><td colspan="6">Bağlantı kurulamadı. Sayfayı yenilemeyi dener misin? (F5)</td></tr>`;
       return;
     }
-    const { data, error } = await supabase
+    const { data, error } = await sb
       .from('uyeler')
       .select('*')
       .order('kayit_tarihi', { ascending: false });
