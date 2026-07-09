@@ -156,7 +156,16 @@
     // ---- Supabase bağlantısı (mevcut projeyle aynı) ----
     const SUPABASE_URL = "https://gbmrzjomyjrzoocryggi.supabase.co";
     const SUPABASE_KEY = "sb_publishable_o03NNtF3nD1j_Pqse9wdqg_mla0fAaj";
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    let supabase = null;
+    try {
+      if (window.supabase) {
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      } else {
+        console.error('Supabase kütüphanesi yüklenemedi (CDN erişim sorunu olabilir).');
+      }
+    } catch (e) {
+      console.error('Supabase başlatma hatası:', e);
+    }
 
     const form = document.getElementById('kayitForm');
     const msgBox = document.getElementById('msgBox');
@@ -170,6 +179,11 @@
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       msgBox.className = 'msg';
+
+      if (!supabase) {
+        showMsg('Bağlantı kurulamadı, lütfen sayfayı yenileyip tekrar dener misin?', 'error');
+        return;
+      }
 
       const ad_soyad = document.getElementById('ad_soyad').value.trim();
       const email = document.getElementById('email').value.trim();
