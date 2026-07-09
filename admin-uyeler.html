@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Üye Yönetimi | Giresun Yöresel Admin</title>
+<style>
+  :root{--forest:#1B4D2E; --forest-dark:#123821; --cream:#F7F5EF; --text:#233327; --muted:#6B7D71;}
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:'Segoe UI', system-ui, sans-serif; background:var(--cream); color:var(--text);}
+  header{background:var(--forest); color:#fff; padding:18px 24px; font-weight:700; font-size:17px;}
+  .wrap{max-width:1000px; margin:0 auto; padding:24px 20px 60px;}
+
+  /* Şifre kapısı */
+  .gate{max-width:340px; margin:80px auto; background:#fff; padding:28px; border-radius:14px; box-shadow:0 8px 24px rgba(18,56,33,.1); text-align:center;}
+  .gate input{width:100%; padding:11px; border:1.5px solid #DCE3DC; border-radius:8px; font-size:14px; margin:14px 0;}
+  .gate button{width:100%; padding:11px; background:var(--forest); color:#fff; border:none; border-radius:8px; font-weight:600; cursor:pointer;}
+  .gate .err{color:#B3432B; font-size:13px; display:none;}
+
+  .toolbar{display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap;}
+  .toolbar input, .toolbar select{padding:9px 12px; border:1.5px solid #DCE3DC; border-radius:8px; font-size:13.5px; background:#fff;}
+  .stat-row{display:flex; gap:14px; margin-bottom:18px; flex-wrap:wrap;}
+  .stat{background:#fff; border-radius:10px; padding:14px 18px; box-shadow:0 4px 12px rgba(18,56,33,.06);}
+  .stat b{display:block; font-size:20px; color:var(--forest);}
+  .stat span{font-size:12px; color:var(--muted);}
+
+  table{width:100%; border-collapse:collapse; background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 4px 16px rgba(18,56,33,.06);}
+  th, td{padding:12px 14px; text-align:left; font-size:13.5px; border-bottom:1px solid #F0F0EA;}
+  th{background:#F3F1E9; color:var(--forest-dark); font-weight:700; font-size:12.5px; text-transform:uppercase; letter-spacing:.3px;}
+  tr:last-child td{border-bottom:none;}
+  .badge{padding:3px 9px; border-radius:20px; font-size:11.5px; font-weight:700;}
+  .badge.aktif{background:#E7F3EA; color:#1B4D2E;}
+  .badge.pasif{background:#F3E5E1; color:#B3432B;}
+  .empty{text-align:center; padding:50px; color:var(--muted);}
+</style>
+</head>
+<body>
+
+<header>Giresun Yöresel — Üye Yönetimi</header>
+
+<div class="gate" id="gate">
+  <h2 style="margin-top:0; font-size:16px;">Admin Girişi</h2>
+  <input type="password" id="pass" placeholder="Şifre">
+  <button onclick="checkPass()">Giriş</button>
+  <div class="err" id="err">Şifre hatalı.</div>
+</div>
+
+<div class="wrap" id="content" style="display:none;">
+  <div class="stat-row" id="statRow"></div>
+  <div class="toolbar">
+    <input type="text" id="search" placeholder="İsim, e-posta veya köy ara..." style="flex:1; min-width:220px;">
+    <select id="filterDurum">
+      <option value="">Tüm Durumlar</option>
+      <option value="aktif">Aktif</option>
+      <option value="pasif">Pasif</option>
+    </select>
+  </div>
+  <table>
+    <thead>
+      <tr><th>Ad Soyad</th><th>E-posta</th><th>Telefon</th><th>Konum</th><th>Kayıt Tarihi</th><th>Durum</th></tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+  <div id="emptyMsg" class="empty" style="display:none;">Üye bulunamadı.</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const SUPABASE_URL = "https://gbmrzjomyjrzoocryggi.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_o03NNtF3nD1j_Pqse9wdqg_mla0fAaj";
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const ADMIN_PASS = "giresun2026"; // mevcut dashboard.html ile aynı şifre
+
+  let tumUyeler = [];
+
+  function checkPass(){
+    const val = document.getElementById('pass').value;
+    if (val === ADMIN_PASS) {
+      document.getElementById('gate').style.display = 'none';
+      document.getElementById('content').style.display = 'block';
+      loadUyeler();
+    } else {
+      document.getElementById('err').style.display = 'block';
+    }
+  }
+  document.getElementById('pass').addEventListener('keydown', e => { if(e.key==='Enter') checkPass(); });
+
+  async function loadUyeler(){
+    const { data, error } = await supabase
+      .from('uyeler')
+      .select('*')
+      .order('kayit_tarihi', { ascending: false });
+
+    if (error) {
+      document.getElementById('tbody').innerHTML = `<tr><td colspan="6">Yüklenemedi: ${error.message}</td></tr>`;
+      return;
+    }
+    tumUyeler = data || [];
+    renderStats();
+    renderTable(tumUyeler);
+  }
+
+  function renderStats(){
+    const toplam = tumUyeler.length;
+    const aktif = tumUyeler.filter(u => u.durum === 'aktif').length;
+    const buAy = tumUyeler.filter(u => {
+      const d = new Date(u.kayit_tarihi);
+      const now = new Date();
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    }).length;
+
+    document.getElementById('statRow').innerHTML = `
+      <div class="stat"><b>${toplam}</b><span>Toplam Üye</span></div>
+      <div class="stat"><b>${aktif}</b><span>Aktif Üye</span></div>
+      <div class="stat"><b>${buAy}</b><span>Bu Ay Katılan</span></div>
+    `;
+  }
+
+  function renderTable(list){
+    const tbody = document.getElementById('tbody');
+    const emptyMsg = document.getElementById('emptyMsg');
+    if (list.length === 0) {
+      tbody.innerHTML = '';
+      emptyMsg.style.display = 'block';
+      return;
+    }
+    emptyMsg.style.display = 'none';
+    tbody.innerHTML = list.map(u => `
+      <tr>
+        <td>${u.ad_soyad}</td>
+        <td>${u.email}</td>
+        <td>${u.telefon || '—'}</td>
+        <td>${u.koy}, ${u.ilce}</td>
+        <td>${new Date(u.kayit_tarihi).toLocaleDateString('tr-TR')}</td>
+        <td><span class="badge ${u.durum}">${u.durum === 'aktif' ? 'Aktif' : 'Pasif'}</span></td>
+      </tr>
+    `).join('');
+  }
+
+  function applyFilters(){
+    const q = document.getElementById('search').value.toLowerCase().trim();
+    const durum = document.getElementById('filterDurum').value;
+    let list = tumUyeler;
+    if (q) {
+      list = list.filter(u =>
+        u.ad_soyad.toLowerCase().includes(q) ||
+        u.email.toLowerCase().includes(q) ||
+        u.koy.toLowerCase().includes(q)
+      );
+    }
+    if (durum) list = list.filter(u => u.durum === durum);
+    renderTable(list);
+  }
+
+  document.getElementById('search').addEventListener('input', applyFilters);
+  document.getElementById('filterDurum').addEventListener('change', applyFilters);
+</script>
+</body>
+</html>

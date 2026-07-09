@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Giriş Yap | Giresun Yöresel</title>
+<link rel="manifest" href="manifest.json">
+<style>
+  :root{
+    --forest:#1B4D2E;
+    --forest-dark:#123821;
+    --forest-light:#2E6B45;
+    --cream:#F7F5EF;
+    --gold:#C89B3C;
+    --text:#233327;
+    --muted:#6B7D71;
+    --error:#B3432B;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Segoe UI', system-ui, -apple-system, sans-serif;
+    background:linear-gradient(180deg, var(--forest) 0%, var(--forest-dark) 300px, var(--cream) 300px);
+    color:var(--text);
+    min-height:100vh;
+  }
+  .topbar{max-width:440px; margin:0 auto; padding:28px 24px 0; text-align:center;}
+  .topbar a{color:#EAF3EC; text-decoration:none; font-size:14px; opacity:.85;}
+  .logo{color:#fff; font-size:22px; font-weight:700; margin:18px 0 4px;}
+  .logo span{color:var(--gold);}
+  .subtitle{color:#CFE3D6; font-size:14px; margin-bottom:18px;}
+  .card{
+    max-width:400px;
+    margin:0 auto 60px;
+    background:#fff;
+    border-radius:var(--radius);
+    padding:32px 28px;
+    box-shadow:0 20px 45px rgba(18,56,33,.18);
+  }
+  h1{font-size:20px; margin:0 0 22px; color:var(--forest-dark);}
+  label{display:block; font-size:13px; font-weight:600; color:var(--forest-dark); margin:16px 0 6px;}
+  input{
+    width:100%; padding:11px 13px; border:1.5px solid #DCE3DC; border-radius:10px;
+    font-size:14.5px; font-family:inherit; background:#FBFAF7;
+  }
+  input:focus{outline:none; border-color:var(--forest-light); background:#fff;}
+  button{
+    width:100%; margin-top:24px; padding:13px; background:var(--forest); color:#fff;
+    border:none; border-radius:10px; font-size:15px; font-weight:600; cursor:pointer;
+  }
+  button:hover{background:var(--forest-dark);}
+  button:disabled{background:#9AAE9F; cursor:not-allowed;}
+  .msg{margin-top:14px; padding:11px 13px; border-radius:8px; font-size:13.5px; display:none;}
+  .msg.error{background:#FBEAE5; color:var(--error); display:block;}
+  .msg.success{background:#E7F3EA; color:var(--forest-dark); display:block;}
+  .footer-link{text-align:center; margin-top:20px; font-size:13.5px; color:var(--muted);}
+  .footer-link a{color:var(--forest); font-weight:600; text-decoration:none;}
+</style>
+</head>
+<body>
+
+  <div class="topbar">
+    <a href="index.html">← Ana Sayfaya Dön</a>
+    <div class="logo">Giresun <span>Yöresel</span></div>
+    <div class="subtitle">Tepeküknarlı köyünden bir aile hikayesi</div>
+  </div>
+
+  <div class="card">
+    <h1>Giriş Yap</h1>
+    <form id="girisForm">
+      <label>E-posta</label>
+      <input type="email" id="email" required placeholder="ornek@mail.com">
+
+      <label>Şifre</label>
+      <input type="password" id="sifre" required placeholder="Şifren">
+
+      <button type="submit" id="submitBtn">Giriş Yap</button>
+      <div class="msg" id="msgBox"></div>
+    </form>
+    <div class="footer-link">
+      Üye değil misin? <a href="kayit.html">Hemen üye ol</a>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = "https://gbmrzjomyjrzoocryggi.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_o03NNtF3nD1j_Pqse9wdqg_mla0fAaj";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const form = document.getElementById('girisForm');
+    const msgBox = document.getElementById('msgBox');
+    const submitBtn = document.getElementById('submitBtn');
+
+    function showMsg(text, type){
+      msgBox.textContent = text;
+      msgBox.className = 'msg ' + type;
+    }
+
+    // Zaten giriş yapmışsa direkt yönlendir
+    supabase.auth.getSession().then(({data}) => {
+      if (data.session) {
+        window.location.href = 'profilim.html';
+      }
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim();
+      const sifre = document.getElementById('sifre').value;
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Giriş yapılıyor...';
+
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password: sifre });
+
+      if (error) {
+        showMsg('E-posta veya şifre hatalı görünüyor.', 'error');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Giriş Yap';
+        return;
+      }
+
+      showMsg('Giriş başarılı, yönlendiriliyorsun...', 'success');
+      setTimeout(() => { window.location.href = 'profilim.html'; }, 700);
+    });
+  </script>
+</body>
+</html>

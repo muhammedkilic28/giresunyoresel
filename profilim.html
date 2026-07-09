@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profilim | Giresun Yöresel</title>
+<link rel="manifest" href="manifest.json">
+<style>
+  :root{
+    --forest:#1B4D2E; --forest-dark:#123821; --forest-light:#2E6B45;
+    --cream:#F7F5EF; --gold:#C89B3C; --text:#233327; --muted:#6B7D71;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:'Segoe UI', system-ui, -apple-system, sans-serif; background:var(--cream); color:var(--text);}
+  header{background:var(--forest); padding:20px 24px; display:flex; justify-content:space-between; align-items:center;}
+  .logo{color:#fff; font-weight:700; font-size:18px; text-decoration:none;}
+  .logo span{color:var(--gold);}
+  .cikis{background:none; border:1.5px solid rgba(255,255,255,.4); color:#fff; padding:7px 14px; border-radius:8px; font-size:13px; cursor:pointer;}
+  .cikis:hover{background:rgba(255,255,255,.1);}
+  .wrap{max-width:560px; margin:0 auto; padding:32px 20px 60px;}
+  .card{background:#fff; border-radius:var(--radius); padding:26px 26px; box-shadow:0 8px 24px rgba(18,56,33,.08); margin-bottom:18px;}
+  .avatar{width:56px; height:56px; border-radius:50%; background:var(--forest); color:#fff; display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:700; margin-bottom:14px;}
+  h1{font-size:19px; margin:0 0 2px;}
+  .email{color:var(--muted); font-size:13.5px; margin-bottom:18px;}
+  .field{display:flex; justify-content:space-between; padding:10px 0; border-top:1px solid #EEEEE8; font-size:14px;}
+  .field-label{color:var(--muted);}
+  .field-value{font-weight:600;}
+  .actions{display:grid; gap:12px; margin-top:6px;}
+  .action-btn{
+    display:flex; align-items:center; gap:12px;
+    background:#fff; border:1.5px solid #E4E4DC; border-radius:12px;
+    padding:16px; text-decoration:none; color:var(--text); font-weight:600; font-size:14.5px;
+  }
+  .action-btn:hover{border-color:var(--forest-light); background:#FBFAF7;}
+  .action-btn .icon{font-size:22px;}
+  .action-btn .desc{display:block; font-weight:400; color:var(--muted); font-size:12.5px; margin-top:2px;}
+  .loading{text-align:center; padding:60px 20px; color:var(--muted);}
+</style>
+</head>
+<body>
+
+<header>
+  <a href="index.html" class="logo">Giresun <span>Yöresel</span></a>
+  <button class="cikis" id="cikisBtn">Çıkış Yap</button>
+</header>
+
+<div class="wrap" id="wrap">
+  <div class="loading">Yükleniyor...</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const SUPABASE_URL = "https://gbmrzjomyjrzoocryggi.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_o03NNtF3nD1j_Pqse9wdqg_mla0fAaj";
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const wrap = document.getElementById('wrap');
+
+  async function init(){
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      window.location.href = 'giris.html';
+      return;
+    }
+
+    const { data: uye, error } = await supabase
+      .from('uyeler')
+      .select('*')
+      .eq('id', session.user.id)
+      .single();
+
+    if (error || !uye) {
+      wrap.innerHTML = '<div class="loading">Bilgiler yüklenemedi. Lütfen sayfayı yenile.</div>';
+      return;
+    }
+
+    const bas = uye.ad_soyad.trim().charAt(0).toUpperCase();
+
+    wrap.innerHTML = `
+      <div class="card">
+        <div class="avatar">${bas}</div>
+        <h1>${uye.ad_soyad}</h1>
+        <div class="email">${uye.email}</div>
+        <div class="field"><span class="field-label">Telefon</span><span class="field-value">${uye.telefon || 'Belirtilmedi'}</span></div>
+        <div class="field"><span class="field-label">Konum</span><span class="field-value">${uye.koy}, ${uye.ilce} / ${uye.il}</span></div>
+        <div class="field"><span class="field-label">Üyelik Tarihi</span><span class="field-value">${new Date(uye.kayit_tarihi).toLocaleDateString('tr-TR')}</span></div>
+      </div>
+
+      <div class="actions">
+        <a href="yazi-paylas.html" class="action-btn">
+          <span class="icon">✍️</span>
+          <span>
+            Yazı Paylaş
+            <span class="desc">Köyünden bir hikaye, fotoğraf ya da video paylaş</span>
+          </span>
+        </a>
+        <a href="ilan-ver.html" class="action-btn">
+          <span class="icon">📋</span>
+          <span>
+            İlan Ver
+            <span class="desc">İmece veya yevmiye ilanı oluştur</span>
+          </span>
+        </a>
+        <a href="blog.html" class="action-btn">
+          <span class="icon">📰</span>
+          <span>
+            Blogu Gör
+            <span class="desc">Onaylanmış tüm yazıları incele</span>
+          </span>
+        </a>
+        <a href="ilanlar.html" class="action-btn">
+          <span class="icon">🌰</span>
+          <span>
+            İlanları Gör
+            <span class="desc">Güncel imece ve yevmiye ilanları</span>
+          </span>
+        </a>
+      </div>
+    `;
+  }
+
+  document.getElementById('cikisBtn').addEventListener('click', async () => {
+    await supabase.auth.signOut();
+    window.location.href = 'index.html';
+  });
+
+  init();
+</script>
+</body>
+</html>

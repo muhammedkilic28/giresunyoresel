@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Üye Ol | Giresun Yöresel</title>
+<meta name="description" content="Giresun Yöresel üyelik sistemi - köy hikayelerini paylaş, imece ve yevmiye ilanlarına gözat.">
+<link rel="manifest" href="manifest.json">
+<style>
+  :root{
+    --forest:#1B4D2E;
+    --forest-dark:#123821;
+    --forest-light:#2E6B45;
+    --cream:#F7F5EF;
+    --gold:#C89B3C;
+    --text:#233327;
+    --muted:#6B7D71;
+    --error:#B3432B;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Segoe UI', system-ui, -apple-system, sans-serif;
+    background:linear-gradient(180deg, var(--forest) 0%, var(--forest-dark) 340px, var(--cream) 340px);
+    color:var(--text);
+    min-height:100vh;
+  }
+  .topbar{
+    max-width:480px;
+    margin:0 auto;
+    padding:28px 24px 0;
+    text-align:center;
+  }
+  .topbar a{color:#EAF3EC; text-decoration:none; font-size:14px; opacity:.85;}
+  .logo{
+    color:#fff;
+    font-size:22px;
+    font-weight:700;
+    letter-spacing:.3px;
+    margin:18px 0 4px;
+  }
+  .logo span{color:var(--gold);}
+  .subtitle{color:#CFE3D6; font-size:14px; margin-bottom:18px;}
+  .card{
+    max-width:440px;
+    margin:0 auto 60px;
+    background:#fff;
+    border-radius:var(--radius);
+    padding:32px 28px;
+    box-shadow:0 20px 45px rgba(18,56,33,.18);
+  }
+  h1{font-size:20px; margin:0 0 6px; color:var(--forest-dark);}
+  .desc{font-size:13.5px; color:var(--muted); margin:0 0 22px; line-height:1.5;}
+  label{display:block; font-size:13px; font-weight:600; color:var(--forest-dark); margin:16px 0 6px;}
+  .required{color:var(--error); font-weight:700;}
+  .optional-tag{color:var(--muted); font-weight:400; font-size:12px;}
+  input, select{
+    width:100%;
+    padding:11px 13px;
+    border:1.5px solid #DCE3DC;
+    border-radius:10px;
+    font-size:14.5px;
+    font-family:inherit;
+    background:#FBFAF7;
+    transition:border-color .15s;
+  }
+  input:focus, select:focus{
+    outline:none;
+    border-color:var(--forest-light);
+    background:#fff;
+  }
+  .row2{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  .row3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;}
+  @media(max-width:420px){.row3{grid-template-columns:1fr;}}
+  button{
+    width:100%;
+    margin-top:26px;
+    padding:13px;
+    background:var(--forest);
+    color:#fff;
+    border:none;
+    border-radius:10px;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    transition:background .15s;
+  }
+  button:hover{background:var(--forest-dark);}
+  button:disabled{background:#9AAE9F; cursor:not-allowed;}
+  .msg{
+    margin-top:14px;
+    padding:11px 13px;
+    border-radius:8px;
+    font-size:13.5px;
+    display:none;
+  }
+  .msg.error{background:#FBEAE5; color:var(--error); display:block;}
+  .msg.success{background:#E7F3EA; color:var(--forest-dark); display:block;}
+  .footer-link{
+    text-align:center;
+    margin-top:20px;
+    font-size:13.5px;
+    color:var(--muted);
+  }
+  .footer-link a{color:var(--forest); font-weight:600; text-decoration:none;}
+</style>
+</head>
+<body>
+
+  <div class="topbar">
+    <a href="index.html">← Ana Sayfaya Dön</a>
+    <div class="logo">Giresun <span>Yöresel</span></div>
+    <div class="subtitle">Tepeküknarlı köyünden bir aile hikayesi</div>
+  </div>
+
+  <div class="card">
+    <h1>Üye Ol</h1>
+    <p class="desc">Üye olarak köy hikayelerini paylaşabilir, imece ve yevmiye ilanlarını görebilir, kendi ilanını verebilirsin.</p>
+
+    <form id="kayitForm">
+      <label>Ad Soyad <span class="required">*</span></label>
+      <input type="text" id="ad_soyad" required placeholder="Örn: Mehmet Yılmaz">
+
+      <label>E-posta <span class="required">*</span></label>
+      <input type="email" id="email" required placeholder="ornek@mail.com">
+
+      <label>Telefon <span class="optional-tag">(isteğe bağlı)</span></label>
+      <input type="tel" id="telefon" placeholder="05XX XXX XX XX">
+
+      <label>Konum <span class="required">*</span></label>
+      <div class="row3">
+        <input type="text" id="il" required placeholder="İl (Giresun)">
+        <input type="text" id="ilce" required placeholder="İlçe (Dereli)">
+        <input type="text" id="koy" required placeholder="Köy">
+      </div>
+
+      <label>Şifre <span class="required">*</span></label>
+      <input type="password" id="sifre" required minlength="6" placeholder="En az 6 karakter">
+
+      <label>Şifre (Tekrar) <span class="required">*</span></label>
+      <input type="password" id="sifreTekrar" required minlength="6" placeholder="Şifreni tekrar yaz">
+
+      <button type="submit" id="submitBtn">Üye Ol</button>
+
+      <div class="msg" id="msgBox"></div>
+    </form>
+
+    <div class="footer-link">
+      Zaten üye misin? <a href="giris.html">Giriş yap</a>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // ---- Supabase bağlantısı (mevcut projeyle aynı) ----
+    const SUPABASE_URL = "https://gbmrzjomyjrzoocryggi.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_o03NNtF3nD1j_Pqse9wdqg_mla0fAaj";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const form = document.getElementById('kayitForm');
+    const msgBox = document.getElementById('msgBox');
+    const submitBtn = document.getElementById('submitBtn');
+
+    function showMsg(text, type){
+      msgBox.textContent = text;
+      msgBox.className = 'msg ' + type;
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      msgBox.className = 'msg';
+
+      const ad_soyad = document.getElementById('ad_soyad').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const telefon = document.getElementById('telefon').value.trim();
+      const il = document.getElementById('il').value.trim();
+      const ilce = document.getElementById('ilce').value.trim();
+      const koy = document.getElementById('koy').value.trim();
+      const sifre = document.getElementById('sifre').value;
+      const sifreTekrar = document.getElementById('sifreTekrar').value;
+
+      if (sifre !== sifreTekrar) {
+        showMsg('Şifreler eşleşmiyor, kontrol eder misin?', 'error');
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Kayıt yapılıyor...';
+
+      try {
+        // 1) Supabase Auth ile kullanıcı oluştur
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+          email: email,
+          password: sifre
+        });
+
+        if (authError) {
+          if (authError.message.includes('already registered') || authError.message.includes('already been registered')) {
+            showMsg('Bu e-posta ile zaten bir üyelik var. Giriş yapmayı dener misin?', 'error');
+          } else {
+            showMsg('Kayıt sırasında bir sorun oluştu: ' + authError.message, 'error');
+          }
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Üye Ol';
+          return;
+        }
+
+        const userId = authData.user?.id;
+        if (!userId) {
+          showMsg('Kayıt oluşturuldu, e-postanı onayladıktan sonra giriş yapabilirsin.', 'success');
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Üye Ol';
+          return;
+        }
+
+        // 2) uyeler tablosuna ek bilgileri yaz
+        const { error: insertError } = await supabase.from('uyeler').insert({
+          id: userId,
+          ad_soyad, email, telefon: telefon || null, il, ilce, koy
+        });
+
+        if (insertError) {
+          showMsg('Hesabın oluştu ama bilgilerin kaydedilirken sorun oldu. Lütfen bize ulaş.', 'error');
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Üye Ol';
+          return;
+        }
+
+        showMsg('Üyeliğin oluşturuldu! Giriş sayfasına yönlendiriliyorsun...', 'success');
+        setTimeout(() => { window.location.href = 'giris.html'; }, 1800);
+
+      } catch (err) {
+        showMsg('Beklenmedik bir hata oluştu, lütfen tekrar dener misin?', 'error');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Üye Ol';
+      }
+    });
+  </script>
+</body>
+</html>
