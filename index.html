@@ -732,7 +732,9 @@ footer ul li a:hover { color: var(--light-hazel); }
     <li><a href="#hikayemiz">Hikayemiz</a></li>
     <li><a href="#urunler">Ürünler</a></li>
     <li><a href="#neden-biz">Neden Biz</a></li>
-    <li><a href="giris.html">Giriş Yap</a></li>
+    <li><a href="blog.html">Blog</a></li>
+    <li><a href="ilanlar.html">İlanlar</a></li>
+    <li id="navGirisItem"><a href="giris.html" id="navGirisLink">Giriş Yap</a></li>
     <li><a href="#iletisim" class="nav-cta">Sipariş Ver</a></li>
   </ul>
   <div class="hamburger" id="hamburger" onclick="toggleMenu()">
@@ -1081,6 +1083,8 @@ footer ul li a:hover { color: var(--light-hazel); }
       <li><a href="#hikayemiz">Hikayemiz</a></li>
       <li><a href="#neden-biz">Neden Biz</a></li>
       <li><a href="#iletisim">Sipariş Ver</a></li>
+      <li><a href="blog.html">Blog</a></li>
+      <li><a href="ilanlar.html">İlanlar</a></li>
       <li><a href="giris.html">Giriş Yap</a></li>
       <li><a href="kayit.html">Üye Ol</a></li>
     </ul>
@@ -1242,5 +1246,24 @@ function installApp() {
   <button onclick="document.getElementById('install-banner').style.display='none'" style="background:none;border:none;color:rgba(255,255,255,.7);font-size:18px;cursor:pointer;padding:0;line-height:1;">✕</button>
 </div>
 
+<script src="supabase-js.min.js"></script>
+<script>
+  // Giriş yapmış kullanıcıya "Giriş Yap" yerine "Profilim" göster
+  (function(){
+    try {
+      if (!window.supabase) return;
+      const sb = window.supabase.createClient(
+        "https://gbmrzjomyjrzoocryggi.supabase.co",
+        "sb_publishable_o03NNtF3nD1j_Pqse9wdqg_mla0fAaj"
+      );
+      sb.auth.getSession().then(({ data }) => {
+        if (data.session) {
+          const link = document.getElementById('navGirisLink');
+          if (link) { link.textContent = 'Profilim'; link.href = 'profilim.html'; }
+        }
+      });
+    } catch (e) { console.error('Giris durumu kontrol edilemedi:', e); }
+  })();
+</script>
 </body>
 </html>
