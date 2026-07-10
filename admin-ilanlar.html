@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Yazı Onayları | Giresun Yöresel Admin</title>
+<title>İlan Onayları | Giresun Yöresel Admin</title>
 <meta name="robots" content="noindex, nofollow">
 <style>
   :root{--forest:#1B4D2E; --forest-dark:#123821; --cream:#F7F5EF; --text:#233327; --muted:#6B7D71; --error:#B3432B;}
@@ -23,32 +23,31 @@
   .tab{padding:8px 16px; border-radius:20px; border:1.5px solid #DCE3DC; background:#fff; font-size:13px; font-weight:600; color:var(--muted); cursor:pointer;}
   .tab.active{background:var(--forest); border-color:var(--forest); color:#fff;}
 
-  .post-card{background:#fff; border-radius:12px; padding:20px; margin-bottom:14px; box-shadow:0 4px 16px rgba(18,56,33,.06);}
-  .post-top{display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:8px; flex-wrap:wrap;}
-  .post-yazar{font-size:12.5px; color:var(--muted);}
+  .ilan-card{background:#fff; border-radius:12px; padding:20px; margin-bottom:14px; box-shadow:0 4px 16px rgba(18,56,33,.06);}
+  .ilan-top{display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:8px; flex-wrap:wrap;}
+  .ilan-sahibi{font-size:12.5px; color:var(--muted);}
   .badge{padding:3px 10px; border-radius:20px; font-size:11px; font-weight:700;}
   .badge.bekliyor{background:#FBF3E3; color:#8A6100;}
   .badge.onaylandi{background:#E7F3EA; color:#1B4D2E;}
   .badge.reddedildi{background:#F3E5E1; color:var(--error);}
-  .post-card h3{font-size:16px; margin:6px 0;}
-  .post-card .icerik{font-size:13.5px; line-height:1.6; color:var(--text); white-space:pre-wrap; margin-bottom:12px; max-height:120px; overflow-y:auto; background:#FBFAF7; padding:10px; border-radius:8px;}
-  .media-row{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;}
-  .media-row img, .media-row video{width:90px; height:90px; object-fit:cover; border-radius:8px; background:#eee;}
+  .tip-etiket{font-size:11px; font-weight:700; padding:3px 9px; border-radius:12px; background:#EEE; color:#555; margin-left:6px;}
+  .ilan-card h3{font-size:16px; margin:6px 0;}
+  .ilan-card .aciklama{font-size:13.5px; line-height:1.6; color:var(--text); white-space:pre-wrap; margin-bottom:10px; background:#FBFAF7; padding:10px; border-radius:8px;}
+  .meta-line{font-size:12.5px; color:var(--muted); margin-bottom:12px;}
   .actions{display:flex; gap:10px;}
   .btn{padding:8px 16px; border-radius:8px; border:none; font-size:13px; font-weight:700; cursor:pointer;}
   .btn-onay{background:var(--forest); color:#fff;}
   .btn-red{background:#fff; color:var(--error); border:1.5px solid var(--error);}
-  .btn:hover{opacity:.9;}
   .empty{text-align:center; padding:50px; color:var(--muted);}
 </style>
 </head>
 <body>
 
 <header>
-  <div class="title">Giresun Yöresel — Yazı Onayları</div>
+  <div class="title">Giresun Yöresel — İlan Onayları</div>
   <nav>
     <a href="admin-uyeler.html">Üyeler</a>
-    <a href="admin-ilanlar.html">İlanlar</a>
+    <a href="admin-yazilar.html">Yazılar</a>
   </nav>
 </header>
 
@@ -65,7 +64,7 @@
     <div class="tab" data-durum="onaylandi">Onaylanan</div>
     <div class="tab" data-durum="reddedildi">Reddedilen</div>
   </div>
-  <div id="postsWrap"></div>
+  <div id="ilanlarWrap"></div>
 </div>
 
 <script src="supabase-js.min.js"></script>
@@ -79,7 +78,7 @@
     if (window.supabase) sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   } catch (e) { console.error(e); }
 
-  let tumYazilar = [];
+  let tumIlanlar = [];
   let aktifTab = 'bekliyor';
 
   function checkPass(){
@@ -87,7 +86,7 @@
     if (val === ADMIN_PASS) {
       document.getElementById('gate').style.display = 'none';
       document.getElementById('content').style.display = 'block';
-      loadPosts();
+      loadIlanlar();
     } else {
       document.getElementById('err').style.display = 'block';
     }
@@ -103,83 +102,67 @@
     render();
   });
 
-  function mediaUrl(path){
-    return `${SUPABASE_URL}/storage/v1/object/public/medya/${path}`;
-  }
-
-  async function loadPosts(){
-    const postsWrap = document.getElementById('postsWrap');
+  async function loadIlanlar(){
+    const wrap = document.getElementById('ilanlarWrap');
     if (!sb) {
-      postsWrap.innerHTML = '<div class="empty">Bağlantı kurulamadı.</div>';
+      wrap.innerHTML = '<div class="empty">Bağlantı kurulamadı.</div>';
       return;
     }
 
-    const { data: gonderiler, error } = await sb
-      .from('gonderiler')
+    const { data: ilanlar, error } = await sb
+      .from('ilanlar')
       .select('*')
       .order('olusturma_tarihi', { ascending: false });
 
     if (error) {
-      postsWrap.innerHTML = `<div class="empty">Yüklenemedi: ${error.message}</div>`;
+      wrap.innerHTML = `<div class="empty">Yüklenemedi: ${error.message}</div>`;
       return;
     }
 
-    const uyeIds = [...new Set((gonderiler || []).map(g => g.uye_id))];
-    const { data: uyeler } = await sb.from('uyeler').select('id, ad_soyad, email, koy').in('id', uyeIds);
+    const uyeIds = [...new Set((ilanlar || []).map(i => i.uye_id))];
+    const { data: uyeler } = await sb.from('uyeler').select('id, ad_soyad, email, telefon').in('id', uyeIds);
     const uyeMap = {};
     (uyeler || []).forEach(u => uyeMap[u.id] = u);
 
-    const gonderiIds = (gonderiler || []).map(g => g.id);
-    const { data: medyalar } = await sb.from('gonderi_medya').select('*').in('gonderi_id', gonderiIds.length ? gonderiIds : ['00000000-0000-0000-0000-000000000000']).order('sira');
-    const medyaMap = {};
-    (medyalar || []).forEach(m => {
-      if (!medyaMap[m.gonderi_id]) medyaMap[m.gonderi_id] = [];
-      medyaMap[m.gonderi_id].push(m);
-    });
-
-    tumYazilar = (gonderiler || []).map(g => ({
-      ...g,
-      yazar: uyeMap[g.uye_id] || { ad_soyad: 'Bilinmeyen', email: '', koy: '' },
-      medya: medyaMap[g.id] || []
-    }));
-
+    tumIlanlar = (ilanlar || []).map(i => ({ ...i, sahibi: uyeMap[i.uye_id] || {} }));
     render();
   }
 
   function render(){
-    const postsWrap = document.getElementById('postsWrap');
-    const list = tumYazilar.filter(y => y.onay_durumu === aktifTab);
+    const wrap = document.getElementById('ilanlarWrap');
+    const list = tumIlanlar.filter(i => i.onay_durumu === aktifTab);
 
     if (list.length === 0) {
-      postsWrap.innerHTML = '<div class="empty">Bu durumda yazı yok.</div>';
+      wrap.innerHTML = '<div class="empty">Bu durumda ilan yok.</div>';
       return;
     }
 
-    postsWrap.innerHTML = list.map(y => {
-      const tarih = new Date(y.olusturma_tarihi).toLocaleDateString('tr-TR');
-      const mediaHtml = y.medya.length ? `<div class="media-row">${
-        y.medya.map(m => m.dosya_tipi === 'video'
-          ? `<video src="${mediaUrl(m.dosya_yolu)}" controls></video>`
-          : `<img src="${mediaUrl(m.dosya_yolu)}">`
-        ).join('')
-      }</div>` : '';
+    wrap.innerHTML = list.map(i => {
+      const tarih = new Date(i.olusturma_tarihi).toLocaleDateString('tr-TR');
+      const tipEtiket = i.ilan_tipi === 'isci_ariyorum' ? '🌰 İşçi Arıyor' : '🙋 Müsait';
 
-      const actionsHtml = y.onay_durumu === 'bekliyor'
+      const metaParcalari = [];
+      if (i.ucret) metaParcalari.push(`💰 ${i.ucret}`);
+      if (i.baslangic_tarihi) metaParcalari.push(`📅 ${i.baslangic_tarihi}${i.bitis_tarihi ? ' – ' + i.bitis_tarihi : ''}`);
+      metaParcalari.push(`📍 ${i.koy}`);
+      metaParcalari.push(i.telefon_paylas ? '📞 Telefon paylaşılıyor' : '✉️ Sadece e-posta');
+
+      const actionsHtml = i.onay_durumu === 'bekliyor'
         ? `<div class="actions">
-             <button class="btn btn-onay" onclick="onayla('${y.id}')">✓ Onayla</button>
-             <button class="btn btn-red" onclick="reddet('${y.id}')">✕ Reddet</button>
+             <button class="btn btn-onay" onclick="onayla('${i.id}')">✓ Onayla</button>
+             <button class="btn btn-red" onclick="reddet('${i.id}')">✕ Reddet</button>
            </div>`
         : '';
 
       return `
-        <div class="post-card">
-          <div class="post-top">
-            <div class="post-yazar">${y.yazar.ad_soyad} (${y.yazar.email})${y.yazar.koy ? ' · ' + y.yazar.koy : ''} · ${tarih}</div>
-            <span class="badge ${y.onay_durumu}">${y.onay_durumu}</span>
+        <div class="ilan-card">
+          <div class="ilan-top">
+            <div class="ilan-sahibi">${i.sahibi.ad_soyad || 'Bilinmeyen'} (${i.sahibi.email || '—'}) · ${tarih}</div>
+            <span class="badge ${i.onay_durumu}">${i.onay_durumu}</span>
           </div>
-          <h3>${y.baslik}${y.kategori ? ' · <span style="font-size:12px;color:var(--muted);font-weight:400;">' + y.kategori + '</span>' : ''}</h3>
-          <div class="icerik">${y.icerik}</div>
-          ${mediaHtml}
+          <h3>${i.baslik} <span class="tip-etiket">${tipEtiket}</span></h3>
+          <div class="aciklama">${i.aciklama}</div>
+          <div class="meta-line">${metaParcalari.join('  ·  ')}</div>
           ${actionsHtml}
         </div>
       `;
@@ -187,18 +170,18 @@
   }
 
   async function onayla(id){
-    const { error } = await sb.from('gonderiler').update({ onay_durumu: 'onaylandi' }).eq('id', id);
+    const { error } = await sb.from('ilanlar').update({ onay_durumu: 'onaylandi' }).eq('id', id);
     if (error) { alert('Onaylanamadı: ' + error.message); return; }
-    const y = tumYazilar.find(x => x.id === id);
-    if (y) y.onay_durumu = 'onaylandi';
+    const i = tumIlanlar.find(x => x.id === id);
+    if (i) i.onay_durumu = 'onaylandi';
     render();
   }
 
   async function reddet(id){
-    const { error } = await sb.from('gonderiler').update({ onay_durumu: 'reddedildi' }).eq('id', id);
+    const { error } = await sb.from('ilanlar').update({ onay_durumu: 'reddedildi' }).eq('id', id);
     if (error) { alert('Reddedilemedi: ' + error.message); return; }
-    const y = tumYazilar.find(x => x.id === id);
-    if (y) y.onay_durumu = 'reddedildi';
+    const i = tumIlanlar.find(x => x.id === id);
+    if (i) i.onay_durumu = 'reddedildi';
     render();
   }
 </script>

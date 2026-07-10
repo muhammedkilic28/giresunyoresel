@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>İlanlar | Giresun Yöresel</title>
+<meta name="description" content="Tepeküknarlı ve çevresinde imece, fındık toplama ve yevmiye ilanları.">
+<link rel="manifest" href="manifest.json">
+<style>
+  :root{
+    --forest:#1B4D2E; --forest-dark:#123821; --forest-light:#2E6B45;
+    --cream:#F7F5EF; --gold:#C89B3C; --text:#233327; --muted:#6B7D71;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:'Segoe UI', system-ui, -apple-system, sans-serif; background:var(--cream); color:var(--text);}
+  header{
+    background:var(--forest); padding:22px 24px; display:flex; justify-content:space-between; align-items:center;
+    flex-wrap:wrap; gap:10px;
+  }
+  .logo{color:#fff; font-weight:700; font-size:18px; text-decoration:none;}
+  .logo span{color:var(--gold);}
+  .header-actions{display:flex; gap:10px; align-items:center;}
+  .header-actions a{color:#EAF3EC; text-decoration:none; font-size:13.5px;}
+  .btn-ver{
+    background:var(--gold); color:#123821 !important; padding:8px 16px; border-radius:20px;
+    font-weight:700; font-size:13px !important;
+  }
+
+  .wrap{max-width:760px; margin:0 auto; padding:32px 20px 60px;}
+  .page-title{font-size:24px; font-weight:700; margin-bottom:6px; color:var(--forest-dark);}
+  .page-sub{color:var(--muted); font-size:14px; margin-bottom:24px;}
+
+  .filters{display:flex; gap:8px; margin-bottom:24px; flex-wrap:wrap;}
+  .filter-chip{
+    padding:7px 15px; border-radius:20px; border:1.5px solid #DCE3DC; background:#fff;
+    font-size:13px; font-weight:600; color:var(--muted); cursor:pointer;
+  }
+  .filter-chip.active{background:var(--forest); border-color:var(--forest); color:#fff;}
+
+  .ilan-card{background:#fff; border-radius:var(--radius); padding:20px; margin-bottom:14px; box-shadow:0 6px 20px rgba(18,56,33,.06);}
+  .ilan-top{display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:8px; flex-wrap:wrap;}
+  .ilan-tip{
+    display:inline-flex; align-items:center; gap:5px; font-size:11.5px; font-weight:700; padding:4px 11px; border-radius:20px;
+  }
+  .ilan-tip.isci_ariyorum{background:#FBF3E3; color:#8A6100;}
+  .ilan-tip.is_ariyorum{background:#E7F0FB; color:#1D4E8A;}
+  .ilan-tarih{font-size:12px; color:var(--muted);}
+  .ilan-card h2{font-size:17px; margin:4px 0 8px; color:var(--forest-dark);}
+  .ilan-aciklama{font-size:14px; line-height:1.6; color:var(--text); white-space:pre-wrap; margin-bottom:12px;}
+
+  .ilan-meta{display:flex; flex-wrap:wrap; gap:16px; margin-bottom:12px; font-size:13px;}
+  .ilan-meta-item{display:flex; align-items:center; gap:6px; color:var(--text);}
+  .ilan-meta-item b{color:var(--forest-dark);}
+
+  .ilan-footer{display:flex; justify-content:space-between; align-items:center; padding-top:12px; border-top:1px solid #F0F0EA; flex-wrap:wrap; gap:8px;}
+  .ilan-sahibi{font-size:12.5px; color:var(--muted);}
+  .iletisim-btns{display:flex; gap:8px;}
+  .iletisim-btn{
+    padding:7px 13px; border-radius:8px; font-size:12.5px; font-weight:700; text-decoration:none;
+    display:inline-flex; align-items:center; gap:5px;
+  }
+  .iletisim-btn.mail{background:var(--forest); color:#fff;}
+  .iletisim-btn.tel{background:#fff; color:var(--forest); border:1.5px solid var(--forest);}
+
+  .empty, .loading{text-align:center; padding:60px 20px; color:var(--muted); font-size:14px;}
+</style>
+</head>
+<body>
+
+<header>
+  <a href="index.html" class="logo">Giresun <span>Yöresel</span></a>
+  <div class="header-actions">
+    <a href="blog.html">Blog</a>
+    <a href="ilan-ver.html" class="btn-ver">📋 İlan Ver</a>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="page-title">İmece &amp; Yevmiye İlanları</div>
+  <div class="page-sub">Fındık toplama zamanı yardımlaşma ilanları — ihtiyaç var ya da yardım edebilecek olan herkes burada.</div>
+
+  <div class="filters" id="filters">
+    <div class="filter-chip active" data-tip="">Tümü</div>
+    <div class="filter-chip" data-tip="isci_ariyorum">🌰 İşçi Arıyor</div>
+    <div class="filter-chip" data-tip="is_ariyorum">🙋 Müsait Olanlar</div>
+  </div>
+
+  <div id="ilanlarWrap"><div class="loading">Yükleniyor...</div></div>
+</div>
+
+<script src="supabase-js.min.js"></script>
+<script>
+  const SUPABASE_URL = "https://gbmrzjomyjrzoocryggi.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_o03NNtF3nD1j_Pqse9wdqg_mla0fAaj";
+  let sb = null;
+  try {
+    if (window.supabase) sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  } catch (e) { console.error(e); }
+
+  const ilanlarWrap = document.getElementById('ilanlarWrap');
+  const filtersEl = document.getElementById('filters');
+  let tumIlanlar = [];
+
+  async function loadIlanlar(){
+    if (!sb) {
+      ilanlarWrap.innerHTML = '<div class="loading">Bağlantı kurulamadı, sayfayı yenilemeyi dener misin?</div>';
+      return;
+    }
+
+    const { data: ilanlar, error } = await sb
+      .from('ilanlar')
+      .select('*')
+      .eq('onay_durumu', 'onaylandi')
+      .order('olusturma_tarihi', { ascending: false });
+
+    if (error || !ilanlar) {
+      ilanlarWrap.innerHTML = '<div class="loading">İlanlar yüklenemedi.</div>';
+      return;
+    }
+
+    if (ilanlar.length === 0) {
+      ilanlarWrap.innerHTML = '<div class="empty">Şu an aktif ilan yok. İlk ilanı sen verebilirsin!</div>';
+      return;
+    }
+
+    const uyeIds = [...new Set(ilanlar.map(i => i.uye_id))];
+    const { data: uyeler } = await sb.from('uyeler').select('id, ad_soyad, email, telefon').in('id', uyeIds);
+    const uyeMap = {};
+    (uyeler || []).forEach(u => uyeMap[u.id] = u);
+
+    tumIlanlar = ilanlar.map(i => ({ ...i, sahibi: uyeMap[i.uye_id] || {} }));
+
+    filtersEl.querySelectorAll('.filter-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        filtersEl.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        const tip = chip.dataset.tip;
+        const filtered = tip ? tumIlanlar.filter(i => i.ilan_tipi === tip) : tumIlanlar;
+        render(filtered);
+      });
+    });
+
+    render(tumIlanlar);
+  }
+
+  function formatTarih(d){
+    if (!d) return '';
+    return new Date(d).toLocaleDateString('tr-TR', { day:'numeric', month:'long' });
+  }
+
+  function render(list){
+    if (list.length === 0) {
+      ilanlarWrap.innerHTML = '<div class="empty">Bu filtrede ilan yok.</div>';
+      return;
+    }
+
+    ilanlarWrap.innerHTML = list.map(i => {
+      const tipEtiket = i.ilan_tipi === 'isci_ariyorum' ? '🌰 İşçi / Yardım Arıyor' : '🙋 Müsait, Yardım Edebilir';
+      const tarihStr = new Date(i.olusturma_tarihi).toLocaleDateString('tr-TR');
+
+      let tarihAraligi = '';
+      if (i.baslangic_tarihi && i.bitis_tarihi) {
+        tarihAraligi = `${formatTarih(i.baslangic_tarihi)} – ${formatTarih(i.bitis_tarihi)}`;
+      } else if (i.baslangic_tarihi) {
+        tarihAraligi = formatTarih(i.baslangic_tarihi) + ' itibarıyla';
+      }
+
+      const metaItems = [];
+      if (i.ucret) metaItems.push(`<div class="ilan-meta-item">💰 <b>${i.ucret}</b></div>`);
+      if (tarihAraligi) metaItems.push(`<div class="ilan-meta-item">📅 ${tarihAraligi}</div>`);
+      metaItems.push(`<div class="ilan-meta-item">📍 ${i.koy}</div>`);
+
+      const email = i.sahibi.email || '';
+      const telefonHtml = (i.telefon_paylas && i.sahibi.telefon)
+        ? `<a href="tel:${i.sahibi.telefon}" class="iletisim-btn tel">📞 ${i.sahibi.telefon}</a>`
+        : '';
+
+      return `
+        <div class="ilan-card">
+          <div class="ilan-top">
+            <span class="ilan-tip ${i.ilan_tipi}">${tipEtiket}</span>
+            <span class="ilan-tarih">${tarihStr}</span>
+          </div>
+          <h2>${i.baslik}</h2>
+          <div class="ilan-aciklama">${i.aciklama}</div>
+          <div class="ilan-meta">${metaItems.join('')}</div>
+          <div class="ilan-footer">
+            <div class="ilan-sahibi">${i.sahibi.ad_soyad || 'Üye'}</div>
+            <div class="iletisim-btns">
+              ${email ? `<a href="mailto:${email}?subject=${encodeURIComponent(i.baslik)}" class="iletisim-btn mail">✉️ İletişime Geç</a>` : ''}
+              ${telefonHtml}
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  loadIlanlar();
+</script>
+</body>
+</html>

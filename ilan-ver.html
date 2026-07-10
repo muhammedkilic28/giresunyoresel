@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>İlan Ver | Giresun Yöresel</title>
+<link rel="manifest" href="manifest.json">
+<style>
+  :root{
+    --forest:#1B4D2E; --forest-dark:#123821; --forest-light:#2E6B45;
+    --cream:#F7F5EF; --gold:#C89B3C; --text:#233327; --muted:#6B7D71;
+    --error:#B3432B; --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:'Segoe UI', system-ui, -apple-system, sans-serif; background:var(--cream); color:var(--text);}
+  header{background:var(--forest); padding:18px 24px; display:flex; justify-content:space-between; align-items:center;}
+  .logo{color:#fff; font-weight:700; font-size:18px; text-decoration:none;}
+  .logo span{color:var(--gold);}
+  .back{color:#EAF3EC; text-decoration:none; font-size:13.5px; opacity:.85;}
+  .wrap{max-width:600px; margin:0 auto; padding:28px 20px 60px;}
+  .card{background:#fff; border-radius:var(--radius); padding:28px 26px; box-shadow:0 8px 24px rgba(18,56,33,.08);}
+  h1{font-size:19px; margin:0 0 4px;}
+  .desc{font-size:13.5px; color:var(--muted); margin:0 0 22px; line-height:1.5;}
+  label{display:block; font-size:13px; font-weight:600; color:var(--forest-dark); margin:16px 0 6px;}
+  .required{color:var(--error);}
+  input[type=text], input[type=date], select, textarea{
+    width:100%; padding:11px 13px; border:1.5px solid #DCE3DC; border-radius:10px;
+    font-size:14.5px; font-family:inherit; background:#FBFAF7;
+  }
+  input:focus, select:focus, textarea:focus{outline:none; border-color:var(--forest-light); background:#fff;}
+  textarea{min-height:110px; resize:vertical; line-height:1.6;}
+  .row2{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+
+  /* İlan tipi seçici */
+  .tip-secici{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .tip-opt{
+    border:1.5px solid #DCE3DC; border-radius:12px; padding:16px 12px; text-align:center; cursor:pointer;
+    transition:border-color .15s, background .15s;
+  }
+  .tip-opt.selected{border-color:var(--forest); background:#EFF6F1;}
+  .tip-opt .icon{font-size:22px; margin-bottom:4px;}
+  .tip-opt .baslik{font-weight:700; font-size:13.5px; color:var(--forest-dark);}
+  .tip-opt .alt{font-size:11.5px; color:var(--muted); margin-top:2px;}
+
+  .checkbox-row{display:flex; align-items:center; gap:8px; margin-top:14px;}
+  .checkbox-row input{width:auto;}
+  .checkbox-row label{margin:0; font-weight:400; font-size:13.5px; color:var(--text);}
+
+  button[type=submit]{
+    width:100%; margin-top:26px; padding:13px; background:var(--forest); color:#fff;
+    border:none; border-radius:10px; font-size:15px; font-weight:600; cursor:pointer;
+  }
+  button[type=submit]:hover{background:var(--forest-dark);}
+  button[type=submit]:disabled{background:#9AAE9F; cursor:not-allowed;}
+
+  .msg{margin-top:14px; padding:11px 13px; border-radius:8px; font-size:13.5px; display:none;}
+  .msg.error{background:#FBEAE5; color:var(--error); display:block;}
+  .msg.success{background:#E7F3EA; color:var(--forest-dark); display:block;}
+</style>
+</head>
+<body>
+
+<header>
+  <a href="index.html" class="logo">Giresun <span>Yöresel</span></a>
+  <a href="profilim.html" class="back">← Profilime Dön</a>
+</header>
+
+<div class="wrap">
+  <div class="card">
+    <h1>İlan Ver</h1>
+    <p class="desc">İmece için yardım ihtiyacın mı var, yoksa belirli günlerde yardım mı edebilirsin? İlanın onaylandıktan sonra herkese açık listede görünecek.</p>
+
+    <form id="ilanForm">
+      <label>İlan Türü <span class="required">*</span></label>
+      <div class="tip-secici">
+        <div class="tip-opt" data-tip="isci_ariyorum">
+          <div class="icon">🌰</div>
+          <div class="baslik">İşçi / Yardım Arıyorum</div>
+          <div class="alt">İmece için ihtiyacım var</div>
+        </div>
+        <div class="tip-opt" data-tip="is_ariyorum">
+          <div class="icon">🙋</div>
+          <div class="baslik">Müsaitim, Yardım Edebilirim</div>
+          <div class="alt">Belirli tarihlerde çalışabilirim</div>
+        </div>
+      </div>
+
+      <label>Başlık <span class="required">*</span></label>
+      <input type="text" id="baslik" required placeholder="Örn: Fındık Toplama İçin Yardım Aranıyor">
+
+      <label>Açıklama / Şartlar <span class="required">*</span></label>
+      <textarea id="aciklama" required placeholder="İşin detayını, şartları, kaç kişi gerektiğini vb. yaz..."></textarea>
+
+      <label>Ücret <span style="font-weight:400; color:var(--muted);">(isteğe bağlı)</span></label>
+      <input type="text" id="ucret" placeholder="Örn: Günlük 700 TL, ya da 'Karşılıklı yardım (imece)'">
+
+      <label>Tarih Aralığı <span style="font-weight:400; color:var(--muted);">(isteğe bağlı)</span></label>
+      <div class="row2">
+        <input type="date" id="baslangic_tarihi">
+        <input type="date" id="bitis_tarihi">
+      </div>
+
+      <label>Köy <span class="required">*</span></label>
+      <input type="text" id="koy" required placeholder="Örn: Tepeküknarlı">
+
+      <div class="checkbox-row">
+        <input type="checkbox" id="telefon_paylas">
+        <label for="telefon_paylas">Profilimdeki telefon numarasını ilanda göster</label>
+      </div>
+      <div class="note" style="font-size:12.5px; color:var(--muted); margin-top:6px;">
+        Bu kutuyu işaretlemezsen, ilanı görenler seninle sadece e-posta üzerinden iletişime geçebilir.
+      </div>
+
+      <button type="submit" id="submitBtn">İlanı Gönder (Onaya Sun)</button>
+      <div class="msg" id="msgBox"></div>
+    </form>
+  </div>
+</div>
+
+<script src="supabase-js.min.js"></script>
+<script>
+  const SUPABASE_URL = "https://gbmrzjomyjrzoocryggi.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_o03NNtF3nD1j_Pqse9wdqg_mla0fAaj";
+  let sb = null;
+  try {
+    if (window.supabase) sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  } catch (e) { console.error(e); }
+
+  let currentUser = null;
+  let secilenTip = null;
+
+  const form = document.getElementById('ilanForm');
+  const msgBox = document.getElementById('msgBox');
+  const submitBtn = document.getElementById('submitBtn');
+
+  function showMsg(text, type){
+    msgBox.textContent = text;
+    msgBox.className = 'msg ' + type;
+  }
+
+  async function init(){
+    if (!sb) {
+      showMsg('Bağlantı kurulamadı. Sayfayı yenilemeyi dener misin?', 'error');
+      submitBtn.disabled = true;
+      return;
+    }
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) {
+      window.location.href = 'giris.html';
+      return;
+    }
+    currentUser = session.user;
+
+    // Kayıtlı köyünü otomatik doldur
+    const { data: uye } = await sb.from('uyeler').select('koy').eq('id', session.user.id).single();
+    if (uye && uye.koy) document.getElementById('koy').value = uye.koy;
+  }
+  init();
+
+  document.querySelectorAll('.tip-opt').forEach(opt => {
+    opt.addEventListener('click', () => {
+      document.querySelectorAll('.tip-opt').forEach(o => o.classList.remove('selected'));
+      opt.classList.add('selected');
+      secilenTip = opt.dataset.tip;
+    });
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    if (!sb || !currentUser) {
+      showMsg('Oturum bulunamadı, lütfen tekrar giriş yap.', 'error');
+      return;
+    }
+    if (!secilenTip) {
+      showMsg('Lütfen ilan türünü seç.', 'error');
+      return;
+    }
+
+    const baslik = document.getElementById('baslik').value.trim();
+    const aciklama = document.getElementById('aciklama').value.trim();
+    const ucret = document.getElementById('ucret').value.trim();
+    const baslangic_tarihi = document.getElementById('baslangic_tarihi').value || null;
+    const bitis_tarihi = document.getElementById('bitis_tarihi').value || null;
+    const koy = document.getElementById('koy').value.trim();
+    const telefon_paylas = document.getElementById('telefon_paylas').checked;
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Gönderiliyor...';
+
+    const { error } = await sb.from('ilanlar').insert({
+      uye_id: currentUser.id,
+      ilan_tipi: secilenTip,
+      baslik, aciklama,
+      ucret: ucret || null,
+      baslangic_tarihi, bitis_tarihi,
+      koy, telefon_paylas
+    });
+
+    if (error) {
+      showMsg('İlan kaydedilemedi: ' + error.message, 'error');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'İlanı Gönder (Onaya Sun)';
+      return;
+    }
+
+    showMsg('İlanın gönderildi! Admin onayından sonra ilan panosunda yayınlanacak.', 'success');
+    setTimeout(() => { window.location.href = 'profilim.html'; }, 2000);
+  });
+</script>
+</body>
+</html>
