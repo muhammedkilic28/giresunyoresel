@@ -60,6 +60,25 @@
   .lightbox.open{display:flex;}
   .lightbox img, .lightbox video{max-width:100%; max-height:90vh; border-radius:10px;}
   .lightbox-close{position:absolute; top:20px; right:24px; color:#fff; font-size:28px; cursor:pointer; background:none; border:none;}
+
+  /* Yorumlar */
+  .comments{margin-top:16px; padding-top:14px; border-top:1px solid #F0F0EA;}
+  .comments-title{font-size:12.5px; font-weight:700; color:var(--muted); margin-bottom:10px; text-transform:uppercase; letter-spacing:.3px;}
+  .comment{display:flex; gap:9px; margin-bottom:12px;}
+  .comment-avatar{width:26px; height:26px; border-radius:50%; background:var(--forest-light); color:#fff; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; flex-shrink:0;}
+  .comment-body{flex:1; background:#FBFAF7; border-radius:10px; padding:9px 12px;}
+  .comment-head{display:flex; justify-content:space-between; align-items:center; gap:8px;}
+  .comment-yazar{font-size:12.5px; font-weight:700; color:var(--forest-dark);}
+  .comment-tarih{font-size:11px; color:var(--muted);}
+  .comment-metin{font-size:13.5px; line-height:1.5; margin-top:2px; white-space:pre-wrap;}
+  .comment-sil{background:none; border:none; color:var(--error); font-size:11px; cursor:pointer; padding:0; margin-top:4px;}
+  .comment-form{display:flex; gap:8px; margin-top:10px;}
+  .comment-form input{flex:1; padding:9px 12px; border:1.5px solid #DCE3DC; border-radius:20px; font-size:13.5px; font-family:inherit;}
+  .comment-form input:focus{outline:none; border-color:var(--forest-light);}
+  .comment-form button{padding:9px 16px; background:var(--forest); color:#fff; border:none; border-radius:20px; font-size:13px; font-weight:700; cursor:pointer; white-space:nowrap;}
+  .comment-login-note{font-size:12.5px; color:var(--muted);}
+  .comment-login-note a{color:var(--forest); font-weight:700; text-decoration:none;}
+  .no-comment{font-size:13px; color:var(--muted); margin-bottom:10px;}
 </style>
 </head>
 <body>
@@ -101,6 +120,18 @@
   const filtersEl = document.getElementById('filters');
   let tumYazilar = [];
   let aktifKategori = '';
+  let currentUserId = null;
+  let currentUserAd = '';
+
+  async function checkSession(){
+    if (!sb) return;
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) {
+      currentUserId = session.user.id;
+      const { data: uye } = await sb.from('uyeler').select('ad_soyad').eq('id', currentUserId).single();
+      if (uye) currentUserAd = uye.ad_soyad;
+    }
+  }
 
   function mediaUrl(path){
     return `${SUPABASE_URL}/storage/v1/object/public/medya/${path}`;
@@ -143,10 +174,25 @@
       medyaMap[m.gonderi_id].push(m);
     });
 
+    // yorumları çek
+    const { data: yorumlar } = await sb.from('yorumlar').select('*').in('gonderi_id', gonderiIds).order('olusturma_tarihi');
+    const yorumUyeIds = [...new Set((yorumlar || []).map(y => y.uye_id))];
+    let yorumUyeMap = {};
+    if (yorumUyeIds.length) {
+      const { data: yorumUyeler } = await sb.from('uyeler').select('id, ad_soyad').in('id', yorumUyeIds);
+      (yorumUyeler || []).forEach(u => yorumUyeMap[u.id] = u);
+    }
+    const yorumMap = {};
+    (yorumlar || []).forEach(y => {
+      if (!yorumMap[y.gonderi_id]) yorumMap[y.gonderi_id] = [];
+      yorumMap[y.gonderi_id].push({ ...y, yazar: yorumUyeMap[y.uye_id] || { ad_soyad: 'Üye' } });
+    });
+
     tumYazilar = gonderiler.map(g => ({
       ...g,
       yazar: uyeMap[g.uye_id] || { ad_soyad: 'Bilinmeyen Üye', koy: '' },
-      medya: medyaMap[g.id] || []
+      medya: medyaMap[g.id] || [],
+      yorumlar: yorumMap[g.id] || []
     }));
 
     renderFilters();
@@ -184,6 +230,35 @@
         ).join('')
       }</div>` : '';
 
+      const yorumlarHtml = y.yorumlar.length
+        ? y.yorumlar.map(yr => {
+            const ybas = (yr.yazar.ad_soyad || '?').charAt(0).toUpperCase();
+            const ytarih = new Date(yr.olusturma_tarihi).toLocaleDateString('tr-TR');
+            const silBtn = (currentUserId && yr.uye_id === currentUserId)
+              ? `<button class="comment-sil" onclick="yorumSil('${yr.id}','${y.id}')">Sil</button>` : '';
+            return `
+              <div class="comment">
+                <div class="comment-avatar">${ybas}</div>
+                <div class="comment-body">
+                  <div class="comment-head">
+                    <span class="comment-yazar">${yr.yazar.ad_soyad}</span>
+                    <span class="comment-tarih">${ytarih}</span>
+                  </div>
+                  <div class="comment-metin">${yr.icerik}</div>
+                  ${silBtn}
+                </div>
+              </div>
+            `;
+          }).join('')
+        : '<div class="no-comment">Henüz yorum yok, ilk yorumu sen yazabilirsin.</div>';
+
+      const yorumFormHtml = currentUserId
+        ? `<form class="comment-form" onsubmit="yorumGonder(event, '${y.id}')">
+             <input type="text" placeholder="Bir yorum yaz..." required maxlength="500">
+             <button type="submit">Gönder</button>
+           </form>`
+        : `<div class="comment-login-note">Yorum yapmak için <a href="giris.html">giriş yap</a>.</div>`;
+
       return `
         <div class="post">
           <div class="post-meta">
@@ -194,6 +269,11 @@
           <h2>${y.baslik}</h2>
           <div class="post-body">${y.icerik}</div>
           ${mediaHtml}
+          <div class="comments">
+            <div class="comments-title">Yorumlar (${y.yorumlar.length})</div>
+            ${yorumlarHtml}
+            ${yorumFormHtml}
+          </div>
         </div>
       `;
     }).join('');
@@ -211,7 +291,55 @@
     document.getElementById('lightboxContent').innerHTML = '';
   }
 
-  loadPosts();
+  window.yorumGonder = async function(e, gonderiId){
+    e.preventDefault();
+    const input = e.target.querySelector('input');
+    const icerik = input.value.trim();
+    if (!icerik || !currentUserId) return;
+
+    const btn = e.target.querySelector('button');
+    btn.disabled = true;
+
+    const { error } = await sb.from('yorumlar').insert({
+      gonderi_id: gonderiId, uye_id: currentUserId, icerik
+    });
+
+    if (error) {
+      alert('Yorum gönderilemedi: ' + error.message);
+      btn.disabled = false;
+      return;
+    }
+
+    // Yerelde de ekleyip yeniden çiz (sayfayı baştan yüklemeye gerek yok)
+    const post = tumYazilar.find(y => y.id === gonderiId);
+    if (post) {
+      post.yorumlar.push({
+        id: 'temp-' + Date.now(),
+        gonderi_id: gonderiId,
+        uye_id: currentUserId,
+        icerik,
+        olusturma_tarihi: new Date().toISOString(),
+        yazar: { ad_soyad: currentUserAd || 'Sen' }
+      });
+    }
+    const filtered = aktifKategori ? tumYazilar.filter(y => y.kategori === aktifKategori) : tumYazilar;
+    renderPosts(filtered);
+  };
+
+  window.yorumSil = async function(yorumId, gonderiId){
+    if (!confirm('Yorumu silmek istediğine emin misin?')) return;
+    const { error } = await sb.from('yorumlar').delete().eq('id', yorumId);
+    if (error) { alert('Silinemedi: ' + error.message); return; }
+    const post = tumYazilar.find(y => y.id === gonderiId);
+    if (post) post.yorumlar = post.yorumlar.filter(y => y.id !== yorumId);
+    const filtered = aktifKategori ? tumYazilar.filter(y => y.kategori === aktifKategori) : tumYazilar;
+    renderPosts(filtered);
+  };
+
+  (async function(){
+    await checkSession();
+    await loadPosts();
+  })();
 </script>
 </body>
 </html>

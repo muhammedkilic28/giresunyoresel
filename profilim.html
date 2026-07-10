@@ -8,7 +8,7 @@
 <style>
   :root{
     --forest:#1B4D2E; --forest-dark:#123821; --forest-light:#2E6B45;
-    --cream:#F7F5EF; --gold:#C89B3C; --text:#233327; --muted:#6B7D71;
+    --cream:#F7F5EF; --gold:#C89B3C; --text:#233327; --muted:#6B7D71; --error:#B3432B;
     --radius:14px;
   }
   *{box-sizing:border-box;}
@@ -18,14 +18,30 @@
   .logo span{color:var(--gold);}
   .cikis{background:none; border:1.5px solid rgba(255,255,255,.4); color:#fff; padding:7px 14px; border-radius:8px; font-size:13px; cursor:pointer;}
   .cikis:hover{background:rgba(255,255,255,.1);}
-  .wrap{max-width:560px; margin:0 auto; padding:32px 20px 60px;}
-  .card{background:#fff; border-radius:var(--radius); padding:26px 26px; box-shadow:0 8px 24px rgba(18,56,33,.08); margin-bottom:18px;}
+  .wrap{max-width:600px; margin:0 auto; padding:32px 20px 60px;}
+  .card{background:#fff; border-radius:var(--radius); padding:26px; box-shadow:0 8px 24px rgba(18,56,33,.08); margin-bottom:18px;}
+
+  .card-top{display:flex; justify-content:space-between; align-items:flex-start;}
   .avatar{width:56px; height:56px; border-radius:50%; background:var(--forest); color:#fff; display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:700; margin-bottom:14px;}
   h1{font-size:19px; margin:0 0 2px;}
   .email{color:var(--muted); font-size:13.5px; margin-bottom:18px;}
   .field{display:flex; justify-content:space-between; padding:10px 0; border-top:1px solid #EEEEE8; font-size:14px;}
   .field-label{color:var(--muted);}
-  .field-value{font-weight:600;}
+  .field-value{font-weight:600; text-align:right;}
+  .edit-link{background:none; border:none; color:var(--forest); font-weight:700; font-size:13px; cursor:pointer; padding:4px 0;}
+
+  label{display:block; font-size:12.5px; font-weight:600; color:var(--forest-dark); margin:14px 0 5px;}
+  input{width:100%; padding:10px 12px; border:1.5px solid #DCE3DC; border-radius:9px; font-size:14px; font-family:inherit; background:#FBFAF7;}
+  input:focus{outline:none; border-color:var(--forest-light); background:#fff;}
+  .row3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;}
+  @media(max-width:420px){.row3{grid-template-columns:1fr;}}
+  .form-actions{display:flex; gap:10px; margin-top:18px;}
+  .btn-kaydet{flex:1; padding:11px; background:var(--forest); color:#fff; border:none; border-radius:9px; font-weight:700; font-size:13.5px; cursor:pointer;}
+  .btn-vazgec{padding:11px 16px; background:#fff; color:var(--muted); border:1.5px solid #DCE3DC; border-radius:9px; font-weight:600; font-size:13.5px; cursor:pointer;}
+  .form-msg{margin-top:10px; padding:9px 12px; border-radius:8px; font-size:13px; display:none;}
+  .form-msg.error{background:#FBEAE5; color:var(--error); display:block;}
+  .form-msg.success{background:#E7F3EA; color:var(--forest-dark); display:block;}
+
   .actions{display:grid; gap:12px; margin-top:6px;}
   .action-btn{
     display:flex; align-items:center; gap:12px;
@@ -36,6 +52,18 @@
   .action-btn .icon{font-size:22px;}
   .action-btn .desc{display:block; font-weight:400; color:var(--muted); font-size:12.5px; margin-top:2px;}
   .loading{text-align:center; padding:60px 20px; color:var(--muted);}
+
+  .section-title{font-size:15px; font-weight:700; color:var(--forest-dark); margin:26px 0 10px;}
+  .mini-card{background:#fff; border-radius:12px; padding:14px 16px; margin-bottom:10px; box-shadow:0 4px 14px rgba(18,56,33,.05);}
+  .mini-top{display:flex; justify-content:space-between; align-items:flex-start; gap:8px;}
+  .mini-title{font-weight:700; font-size:14px; color:var(--forest-dark);}
+  .mini-meta{font-size:11.5px; color:var(--muted); margin-top:2px;}
+  .mini-badge{font-size:10.5px; font-weight:700; padding:3px 9px; border-radius:20px; white-space:nowrap;}
+  .mini-badge.bekliyor{background:#FBF3E3; color:#8A6100;}
+  .mini-badge.onaylandi{background:#E7F3EA; color:#1B4D2E;}
+  .mini-badge.reddedildi{background:#F3E5E1; color:var(--error);}
+  .mini-sil{background:none; border:none; color:var(--error); font-size:12px; font-weight:700; cursor:pointer; margin-top:8px; padding:0;}
+  .empty-mini{font-size:13px; color:var(--muted); padding:6px 0 18px;}
 </style>
 </head>
 <body>
@@ -55,15 +83,13 @@
   const SUPABASE_KEY = "sb_publishable_o03NNtF3nD1j_Pqse9wdqg_mla0fAaj";
   let sb = null;
   try {
-    if (window.supabase) {
-      sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    } else {
-      console.error('Supabase kütüphanesi yüklenemedi (CDN erişim sorunu olabilir).');
-    }
-  } catch (e) {
-    console.error('Supabase başlatma hatası:', e);
-  }
+    if (window.supabase) sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    else console.error('Supabase kütüphanesi yüklenemedi.');
+  } catch (e) { console.error('Supabase başlatma hatası:', e); }
+
   const wrap = document.getElementById('wrap');
+  let currentUye = null;
+  let currentUserId = null;
 
   async function init(){
     if (!sb) {
@@ -71,66 +97,182 @@
       return;
     }
     const { data: { session } } = await sb.auth.getSession();
-    if (!session) {
-      window.location.href = 'giris.html';
-      return;
-    }
+    if (!session) { window.location.href = 'giris.html'; return; }
+    currentUserId = session.user.id;
 
-    const { data: uye, error } = await sb
-      .from('uyeler')
-      .select('*')
-      .eq('id', session.user.id)
-      .single();
-
+    const { data: uye, error } = await sb.from('uyeler').select('*').eq('id', currentUserId).single();
     if (error || !uye) {
       wrap.innerHTML = '<div class="loading">Bilgiler yüklenemedi. Lütfen sayfayı yenile.</div>';
       return;
     }
+    currentUye = uye;
+    wrap.innerHTML = '';
+    renderProfilKart();
+    renderAksiyonlar();
+    loadYazilarim();
+    loadIlanlarim();
+  }
 
-    const bas = uye.ad_soyad.trim().charAt(0).toUpperCase();
-
-    wrap.innerHTML = `
-      <div class="card">
-        <div class="avatar">${bas}</div>
-        <h1>${uye.ad_soyad}</h1>
-        <div class="email">${uye.email}</div>
-        <div class="field"><span class="field-label">Telefon</span><span class="field-value">${uye.telefon || 'Belirtilmedi'}</span></div>
-        <div class="field"><span class="field-label">Konum</span><span class="field-value">${uye.koy}, ${uye.ilce} / ${uye.il}</span></div>
-        <div class="field"><span class="field-label">Üyelik Tarihi</span><span class="field-value">${new Date(uye.kayit_tarihi).toLocaleDateString('tr-TR')}</span></div>
+  function renderProfilKart(){
+    const u = currentUye;
+    const bas = u.ad_soyad.trim().charAt(0).toUpperCase();
+    const existing = document.getElementById('profilKart');
+    const html = `
+      <div class="card" id="profilKart">
+        <div class="card-top">
+          <div>
+            <div class="avatar">${bas}</div>
+            <h1>${u.ad_soyad}</h1>
+            <div class="email">${u.email}</div>
+          </div>
+          <button class="edit-link" id="editToggleBtn">Düzenle</button>
+        </div>
+        <div id="profilGoruntule">
+          <div class="field"><span class="field-label">Telefon</span><span class="field-value">${u.telefon || 'Belirtilmedi'}</span></div>
+          <div class="field"><span class="field-label">Konum</span><span class="field-value">${u.koy}, ${u.ilce} / ${u.il}</span></div>
+          <div class="field"><span class="field-label">Üyelik Tarihi</span><span class="field-value">${new Date(u.kayit_tarihi).toLocaleDateString('tr-TR')}</span></div>
+        </div>
+        <form id="profilForm" style="display:none;">
+          <label>Ad Soyad</label>
+          <input type="text" id="f_ad_soyad" value="${u.ad_soyad}" required>
+          <label>Telefon <span style="font-weight:400;color:var(--muted);">(isteğe bağlı)</span></label>
+          <input type="tel" id="f_telefon" value="${u.telefon || ''}">
+          <label>Konum</label>
+          <div class="row3">
+            <input type="text" id="f_il" value="${u.il}" placeholder="İl" required>
+            <input type="text" id="f_ilce" value="${u.ilce}" placeholder="İlçe" required>
+            <input type="text" id="f_koy" value="${u.koy}" placeholder="Köy" required>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn-kaydet">Kaydet</button>
+            <button type="button" class="btn-vazgec" id="vazgecBtn">Vazgeç</button>
+          </div>
+          <div class="form-msg" id="formMsg"></div>
+        </form>
       </div>
+    `;
+    if (existing) existing.outerHTML = html; else wrap.insertAdjacentHTML('beforeend', html);
 
+    document.getElementById('editToggleBtn').addEventListener('click', () => {
+      document.getElementById('profilGoruntule').style.display = 'none';
+      document.getElementById('profilForm').style.display = 'block';
+      document.getElementById('editToggleBtn').style.display = 'none';
+    });
+    document.getElementById('vazgecBtn').addEventListener('click', () => {
+      document.getElementById('profilGoruntule').style.display = 'block';
+      document.getElementById('profilForm').style.display = 'none';
+      document.getElementById('editToggleBtn').style.display = 'block';
+    });
+    document.getElementById('profilForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const msgBox = document.getElementById('formMsg');
+      const guncel = {
+        ad_soyad: document.getElementById('f_ad_soyad').value.trim(),
+        telefon: document.getElementById('f_telefon').value.trim() || null,
+        il: document.getElementById('f_il').value.trim(),
+        ilce: document.getElementById('f_ilce').value.trim(),
+        koy: document.getElementById('f_koy').value.trim(),
+      };
+      const { error } = await sb.from('uyeler').update(guncel).eq('id', currentUserId);
+      if (error) {
+        msgBox.textContent = 'Kaydedilemedi: ' + error.message;
+        msgBox.className = 'form-msg error';
+        return;
+      }
+      currentUye = { ...currentUye, ...guncel };
+      msgBox.textContent = 'Bilgilerin güncellendi!';
+      msgBox.className = 'form-msg success';
+      setTimeout(() => renderProfilKart(), 900);
+    });
+  }
+
+  function renderAksiyonlar(){
+    wrap.insertAdjacentHTML('beforeend', `
       <div class="actions">
         <a href="yazi-paylas.html" class="action-btn">
           <span class="icon">✍️</span>
-          <span>
-            Yazı Paylaş
-            <span class="desc">Köyünden bir hikaye, fotoğraf ya da video paylaş</span>
-          </span>
+          <span>Yazı Paylaş<span class="desc">Köyünden bir hikaye, fotoğraf ya da video paylaş</span></span>
         </a>
         <a href="ilan-ver.html" class="action-btn">
           <span class="icon">📋</span>
-          <span>
-            İlan Ver
-            <span class="desc">İmece veya yevmiye ilanı oluştur</span>
-          </span>
+          <span>İlan Ver<span class="desc">İmece veya yevmiye ilanı oluştur</span></span>
         </a>
         <a href="blog.html" class="action-btn">
           <span class="icon">📰</span>
-          <span>
-            Blogu Gör
-            <span class="desc">Onaylanmış tüm yazıları incele</span>
-          </span>
+          <span>Blogu Gör<span class="desc">Onaylanmış tüm yazıları incele</span></span>
         </a>
         <a href="ilanlar.html" class="action-btn">
           <span class="icon">🌰</span>
-          <span>
-            İlanları Gör
-            <span class="desc">Güncel imece ve yevmiye ilanları</span>
-          </span>
+          <span>İlanları Gör<span class="desc">Güncel imece ve yevmiye ilanları</span></span>
         </a>
       </div>
-    `;
+      <div class="section-title">Yazılarım</div>
+      <div id="yazilarimWrap"><div class="empty-mini">Yükleniyor...</div></div>
+      <div class="section-title">İlanlarım</div>
+      <div id="ilanlarimWrap"><div class="empty-mini">Yükleniyor...</div></div>
+    `);
   }
+
+  async function loadYazilarim(){
+    const elWrap = document.getElementById('yazilarimWrap');
+    const { data, error } = await sb.from('gonderiler').select('*').eq('uye_id', currentUserId).order('olusturma_tarihi', { ascending: false });
+    if (error || !data || data.length === 0) {
+      elWrap.innerHTML = '<div class="empty-mini">Henüz bir yazı paylaşmadın.</div>';
+      return;
+    }
+    elWrap.innerHTML = data.map(y => `
+      <div class="mini-card">
+        <div class="mini-top">
+          <div>
+            <div class="mini-title">${y.baslik}</div>
+            <div class="mini-meta">${new Date(y.olusturma_tarihi).toLocaleDateString('tr-TR')}${y.kategori ? ' · ' + y.kategori : ''}</div>
+          </div>
+          <span class="mini-badge ${y.onay_durumu}">${y.onay_durumu}</span>
+        </div>
+        <button class="mini-sil" onclick="yaziSil('${y.id}')">🗑 Sil</button>
+      </div>
+    `).join('');
+  }
+
+  async function loadIlanlarim(){
+    const elWrap = document.getElementById('ilanlarimWrap');
+    const { data, error } = await sb.from('ilanlar').select('*').eq('uye_id', currentUserId).order('olusturma_tarihi', { ascending: false });
+    if (error || !data || data.length === 0) {
+      elWrap.innerHTML = '<div class="empty-mini">Henüz bir ilan vermedin.</div>';
+      return;
+    }
+    elWrap.innerHTML = data.map(i => `
+      <div class="mini-card">
+        <div class="mini-top">
+          <div>
+            <div class="mini-title">${i.baslik}</div>
+            <div class="mini-meta">${new Date(i.olusturma_tarihi).toLocaleDateString('tr-TR')} · ${i.ilan_tipi === 'isci_ariyorum' ? 'İşçi Arıyor' : 'Müsait'}</div>
+          </div>
+          <span class="mini-badge ${i.onay_durumu}">${i.onay_durumu}</span>
+        </div>
+        <button class="mini-sil" onclick="ilanSil('${i.id}')">🗑 Sil</button>
+      </div>
+    `).join('');
+  }
+
+  window.yaziSil = async function(id){
+    if (!confirm('Bu yazıyı silmek istediğine emin misin? Bu işlem geri alınamaz.')) return;
+
+    const { data: medyalar } = await sb.from('gonderi_medya').select('dosya_yolu').eq('gonderi_id', id);
+    if (medyalar && medyalar.length) {
+      await sb.storage.from('medya').remove(medyalar.map(m => m.dosya_yolu));
+    }
+    const { error } = await sb.from('gonderiler').delete().eq('id', id);
+    if (error) { alert('Silinemedi: ' + error.message); return; }
+    loadYazilarim();
+  };
+
+  window.ilanSil = async function(id){
+    if (!confirm('Bu ilanı silmek istediğine emin misin? Bu işlem geri alınamaz.')) return;
+    const { error } = await sb.from('ilanlar').delete().eq('id', id);
+    if (error) { alert('Silinemedi: ' + error.message); return; }
+    loadIlanlarim();
+  };
 
   document.getElementById('cikisBtn').addEventListener('click', async () => {
     await sb.auth.signOut();
