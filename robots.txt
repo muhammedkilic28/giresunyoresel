@@ -4,6 +4,8 @@ Allow: /
 # Admin paneli ve sipariş yönetimi arama motorlarında görünmesin
 Disallow: /dashboard.html
 Disallow: /admin-uyeler.html
+Disallow: /admin-yazilar.html
+Disallow: /admin-ilanlar.html
 Disallow: /fiyatlar.html
 
 Sitemap: https://giresunyoresel.com.tr/sitemap.xml
