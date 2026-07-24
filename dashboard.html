@@ -148,6 +148,9 @@
   .save-note-btn:hover { background: #0F2D1A; }
   .save-note-btn.saved { background: #3A7D44; }
 
+  .delete-order-btn { width: 100%; margin-top: 10px; padding: 11px; background: #fff; color: #C0392B; border: 1.5px solid #F0C8C4; border-radius: 8px; font-size: 13.5px; font-weight: 600; cursor: pointer; transition: all .2s; }
+  .delete-order-btn:hover { background: #FEECEB; }
+
   .note-history { margin-top: 16px; display: flex; flex-direction: column; gap: 10px; }
   .note-item { background: #F4F7F2; border-radius: 8px; padding: 10px 12px; font-size: 13px; color: #333; line-height: 1.55; }
   .note-item-date { font-size: 11px; color: #888; margin-bottom: 4px; }
@@ -262,6 +265,7 @@
   </div>
   <div class="panel-footer">
     <button class="save-note-btn" id="save-note-btn" onclick="saveNote()">Notu Kaydet</button>
+    <button class="delete-order-btn" onclick="deleteOrder()">🗑️ Siparişi Sil</button>
   </div>
 </div>
 
@@ -503,6 +507,28 @@ function openPanel(id) {
   document.getElementById('overlay').classList.add('open');
   document.getElementById('detail-panel').classList.add('open');
 }
+async function deleteOrder() {
+  if (!currentOrderId) return;
+  const o = allOrders.find(x => x.id === currentOrderId);
+  const ad = o ? o.ad_soyad : 'bu sipariş';
+  if (!confirm(`"${ad}" siparişini kalıcı olarak silmek istediğinize emin misiniz? Bu işlem geri alınamaz.`)) return;
+
+  const id = currentOrderId;
+  try {
+    await fetch(`${SB_URL}/rest/v1/siparisler?id=eq.${id}`, {
+      method: 'DELETE',
+      headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
+    });
+    allOrders = allOrders.filter(x => x.id !== id);
+    localStorage.removeItem('notes_' + id);
+    updateStats();
+    renderTable();
+    closePanel();
+  } catch (e) {
+    alert('Sipariş silinirken bir hata oluştu, tekrar deneyin.');
+  }
+}
+
 function closePanel() {
   document.getElementById('overlay').classList.remove('open');
   document.getElementById('detail-panel').classList.remove('open');
