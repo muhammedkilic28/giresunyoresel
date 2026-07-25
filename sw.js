@@ -1,4 +1,4 @@
-const CACHE = 'giresunyoresel-v2'; // versiyon artırıldı, eski cache otomatik temizlenecek
+const CACHE = 'giresunyoresel-v3'; // versiyon artırıldı, eski cache (v2 dahil) otomatik temizlenecek
 const ASSETS = [
   '/logo.png',
   '/reklam.jpg',
@@ -10,7 +10,11 @@ const ASSETS = [
   '/urun-kara-lahana.jpg',
   '/urun-fasulye.jpg',
   '/urun-misir-ekmegi.jpg',
-  '/urun-misir.jpg'
+  '/urun-misir.jpg',
+  '/hasat-banner-video.mp4',
+  '/hasat-orman.jpg',
+  '/hasat-eller.jpg',
+  '/hasat-sepetler.jpg'
 ];
 
 // Kurulum — sadece ağır/statik medya dosyalarını önbelleğe al
@@ -60,17 +64,22 @@ self.addEventListener('fetch', e => {
     return;
   }
 
-  // Görsel/video gibi ağır statik dosyalar: ÖNCE CACHE (hızlı yüklensin),
-  // cache'de yoksa network'ten çekip cache'e ekle.
+  // Görsel/video gibi ağır statik dosyalar: STALE-WHILE-REVALIDATE.
+  // Önce cache'ten anında göster (hızlı), AYNI ANDA arka planda network'ten
+  // taze halini çek ve cache'i güncelle. Böylece bir sonraki ziyarette
+  // (aynı dosya adı değişmiş olsa bile) güncel versiyon otomatik gösterilir,
+  // manuel cache versiyonu artırmaya gerek kalmaz.
   e.respondWith(
     caches.match(request).then(cached => {
-      if (cached) return cached;
-      return fetch(request).then(res => {
-        if (!res || res.status !== 200 || res.type !== 'basic') return res;
-        const clone = res.clone();
-        caches.open(CACHE).then(cache => cache.put(request, clone));
+      const networkFetch = fetch(request).then(res => {
+        if (res && res.status === 200 && res.type === 'basic') {
+          const clone = res.clone();
+          caches.open(CACHE).then(cache => cache.put(request, clone));
+        }
         return res;
-      });
+      }).catch(() => cached);
+
+      return cached || networkFetch;
     })
   );
 });
