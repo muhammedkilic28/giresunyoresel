@@ -515,17 +515,33 @@ async function deleteOrder() {
 
   const id = currentOrderId;
   try {
-    await fetch(`${SB_URL}/rest/v1/siparisler?id=eq.${id}`, {
+    const res = await fetch(`${SB_URL}/rest/v1/siparisler?id=eq.${id}`, {
       method: 'DELETE',
-      headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
+      headers: {
+        'apikey': SB_KEY,
+        'Authorization': `Bearer ${SB_KEY}`,
+        'Prefer': 'return=representation'
+      }
     });
+
+    if (!res.ok) {
+      alert('Sipariş silinemedi (izin hatası olabilir). Supabase RLS politikalarını kontrol edin.');
+      return;
+    }
+
+    const deletedRows = await res.json();
+    if (!deletedRows || deletedRows.length === 0) {
+      alert('Sipariş silinemedi: veritabanı hiçbir satır silmedi. RLS politikası eksik olabilir.');
+      return;
+    }
+
     allOrders = allOrders.filter(x => x.id !== id);
     localStorage.removeItem('notes_' + id);
     updateStats();
     renderTable();
     closePanel();
   } catch (e) {
-    alert('Sipariş silinirken bir hata oluştu, tekrar deneyin.');
+    alert('Sipariş silinirken bir hata oluştu: ' + e.message);
   }
 }
 
