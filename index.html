@@ -1066,7 +1066,7 @@ footer ul li a:hover { color: var(--light-hazel); }
     </div>
     <div class="form-group">
       <label>İstediğiniz Ürün</label>
-      <select id="product">
+      <select id="product" onchange="toggleMiktar()">
         <option value="">Ürün seçin…</option>
         <option>Fındık İçi</option>
         <option>Kabuklu Fındık</option>
@@ -1079,9 +1079,17 @@ footer ul li a:hover { color: var(--light-hazel); }
         <option>Karışık Sipariş</option>
       </select>
     </div>
+    <div class="form-group" id="miktarGroup" style="display:none;">
+      <label>Miktar</label>
+      <input type="text" id="miktar" placeholder="Örn: 1 kg, 500 gr, 3 adet">
+    </div>
     <div class="form-group">
-      <label>Sipariş Detayı & Adres</label>
-      <textarea id="message" placeholder="Miktar, teslimat adresi ve varsa özel isteklerinizi belirtin…"></textarea>
+      <label>Adres <span style="font-weight:400;color:var(--text-muted,#888);">(isteğe bağlı)</span></label>
+      <input type="text" id="adres" placeholder="Teslimat adresinizi girin">
+    </div>
+    <div class="form-group">
+      <label>Sipariş Detayı <span style="font-weight:400;color:var(--text-muted,#888);">(isteğe bağlı)</span></label>
+      <textarea id="message" placeholder="Varsa özel isteklerinizi belirtin…"></textarea>
     </div>
     <button class="form-submit" onclick="submitForm()">🌰 Siparişi Gönder</button>
     <div class="success-msg" id="successMsg">✅ Siparişiniz alındı! En kısa sürede sizi arayacağız.</div>
@@ -1174,11 +1182,19 @@ async function loadProductPrices() {
 loadProductPrices();
 
 /* form */
+function toggleMiktar() {
+  const product = document.getElementById('product').value;
+  const group = document.getElementById('miktarGroup');
+  group.style.display = product ? 'block' : 'none';
+}
+
 async function submitForm() {
   const name    = document.getElementById('name').value.trim();
   const phone   = document.getElementById('phone').value.trim();
   const email   = document.getElementById('email').value.trim();
   const product = document.getElementById('product').value;
+  const miktar  = document.getElementById('miktar').value.trim();
+  const adres   = document.getElementById('adres').value.trim();
   const message = document.getElementById('message').value.trim();
 
   if (!name) { alert('Lütfen adınızı ve soyadınızı girin.'); return; }
@@ -1191,6 +1207,13 @@ async function submitForm() {
   const btn = document.querySelector('.form-submit');
   btn.disabled = true;
   btn.textContent = 'Gönderiliyor…';
+
+  // Miktar, adres ve detayı tek "detay" alanında birleştir (tablo yapısı sabit)
+  const detayParcalari = [];
+  if (miktar) detayParcalari.push(`Miktar: ${miktar}`);
+  if (adres) detayParcalari.push(`Adres: ${adres}`);
+  if (message) detayParcalari.push(`Not: ${message}`);
+  const detayBirlesik = detayParcalari.join('\n') || '—';
 
   try {
     const res = await fetch(`${SB_URL}/rest/v1/siparisler`, {
@@ -1205,7 +1228,7 @@ async function submitForm() {
         ad_soyad: name,
         telefon_email: phone + ' | ' + email,
         urun: product,
-        detay: message,
+        detay: detayBirlesik,
         durum: 'Yeni'
       })
     });
@@ -1216,7 +1239,10 @@ async function submitForm() {
       document.getElementById('phone').value = '';
       document.getElementById('email').value = '';
       document.getElementById('product').value = '';
+      document.getElementById('miktar').value = '';
+      document.getElementById('adres').value = '';
       document.getElementById('message').value = '';
+      document.getElementById('miktarGroup').style.display = 'none';
     } else {
       alert('Bir hata oluştu, lütfen tekrar deneyin.');
     }
