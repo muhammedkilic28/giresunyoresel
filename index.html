@@ -447,6 +447,15 @@ section { padding: 90px 80px; }
   color: var(--mist);
   line-height: 1.6;
 }
+.prod-desc-toggle {
+  display: inline-block; background: none; border: none; padding: 0; margin-top: 6px;
+  font-family: var(--sans); font-size: .78rem; font-weight: 700; color: var(--gold);
+  cursor: pointer; text-decoration: underline; text-underline-offset: 2px;
+}
+.prod-desc-full {
+  display: none; font-size: .85rem; color: var(--mist); line-height: 1.7;
+  margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(0,0,0,.06);
+}
 .prod-tags {
   display: flex; flex-wrap: wrap; gap: 6px;
   margin-top: 14px;
@@ -872,6 +881,8 @@ footer ul li a:hover { color: var(--light-hazel); }
         <div class="prod-cat">Fındık Ürünleri</div>
         <div class="prod-name">Giresun Fındık İçi</div>
         <div class="prod-desc">Karadeniz'in bereketli bahçelerinden toplanan, özenle ayıklanmış ve kurutulmuş iç fındık. Çiğ tüketim, pasta ve çikolata yapımı için idealdir.</div>
+        <button class="prod-desc-toggle" onclick="toggleDesc(this)">Devamını oku ▾</button>
+        <div class="prod-desc-full">Tepeküknarlı köyündeki bahçelerimizde yetişen tombul fındık çeşidinden elde edilen bu ürün, hasat sonrası kısa sürede kabuğundan ayrılıp özenle kurutulur. Nem oranı belirli bir seviyeye düşene kadar bekletilen fındıklar, hem lezzetini hem de besin değerini korur. Herhangi bir kimyasal işlem ya da hızlandırıcı yöntem kullanılmadan, tamamen doğal koşullarda hazırlanır. Yüksek protein, sağlıklı yağ asitleri ve E vitamini içeriğiyle hem atıştırmalık olarak hem de mutfakta geniş bir kullanım alanı sunar — çiğ olarak tüketilebilir, pastalarda, kurabiyelerde, ev yapımı çikolatalarda ya da salatalarda kullanılabilir. Ailemizin nesillerdir sürdürdüğü hasat ve kurutma yöntemleriyle hazırlanan bu fındıklar, hiçbir katkı maddesi içermez.</div>
         <div class="prod-tags">
           <span class="tag">Doğal</span>
           <span class="tag">Glutensiz</span>
@@ -890,6 +901,8 @@ footer ul li a:hover { color: var(--light-hazel); }
         <div class="prod-cat">Fındık Ürünleri</div>
         <div class="prod-name">Fındık Ezmesi</div>
         <div class="prod-desc">Saf fındıktan üretilen, şeker eklenmemiş geleneksel fındık ezmesi.</div>
+        <button class="prod-desc-toggle" onclick="toggleDesc(this)">Devamını oku ▾</button>
+        <div class="prod-desc-full">Kavrulmuş Giresun fındığından hazırlanan bu ezme, hiçbir şeker, koruyucu ya da katkı maddesi içermez — sadece fındık ve emek. Kıvamı tamamen doğal yağ oranına bağlı olarak şekillenir, mevsimden mevsime hafif farklılıklar gösterebilir; bu da ürünün endüstriyel olmadığının en güzel kanıtıdır. Kahvaltılarda ekmek üzerine sürülebilir, tatlı tariflerinde şeker oranını azaltmak isteyenler için doğal bir alternatif sunar, ya da doğrudan kaşıkla tüketilebilir. Şekersiz oluşu sayesinde, kan şekerini kontrol etmeye çalışanlar ya da düşük şekerli beslenmeyi tercih edenler için de uygun bir seçenektir. Cam kavanozda, oda sıcaklığında ya da buzdolabında saklanabilir.</div>
         <div class="prod-tags"><span class="tag">Saf Fındık</span><span class="tag">Şekersiz</span></div>
         <div class="prod-price loading" data-pid="findik-ezmesi">Fiyat yükleniyor…</div>
       </div>
@@ -903,6 +916,8 @@ footer ul li a:hover { color: var(--light-hazel); }
         <div class="prod-cat">Fındık Ürünleri</div>
         <div class="prod-name">Kabuklu Fındık</div>
         <div class="prod-desc">Kabuğu korunmuş, uzun ömürlü, taze Giresun fındığı.</div>
+        <button class="prod-desc-toggle" onclick="toggleDesc(this)">Devamını oku ▾</button>
+        <div class="prod-desc-full">Kabuğunda satılan fındık, iç fındığa göre çok daha uzun süre tazeliğini korur — çünkü kabuk, doğal bir koruyucu görevi görür ve içindeki yağların havayla temasını sınırlar. Bu yüzden özellikle uzun süre saklamak isteyenler ya da hediyelik almak isteyenler için idealdir. Bizim bahçelerimizde yetişen fındıklar, hasat sonrası güneşte ya da gölgeli, havadar alanlarda doğal yollarla kurutulur; hiçbir suni kurutma yöntemi kullanılmaz. Kırıldığında karşınıza taze, dolgun ve lezzetli bir iç çıkar. İsterseniz kendiniz kırıp anında tüketebilir, isterseniz kabuğuyla birlikte sofranızda dekoratif bir kase içinde misafirlerinize ikram edebilirsiniz. Çocukların fındık kırma deneyimini yaşaması için de güzel bir fırsat sunar.</div>
         <div class="prod-tags"><span class="tag">Uzun Ömürlü</span><span class="tag">Doğal Kabuklu</span></div>
         <div class="prod-price loading" data-pid="kabuklu-findik">Fiyat yükleniyor…</div>
       </div>
@@ -916,6 +931,8 @@ footer ul li a:hover { color: var(--light-hazel); }
         <div class="prod-cat">Yöresel Sebze</div>
         <div class="prod-name">Yöresel Kara Lahana</div>
         <div class="prod-desc">Giresun yaylalarından toplanan, taze ya da kurutulmuş kara lahana.</div>
+        <button class="prod-desc-toggle" onclick="toggleDesc(this)">Devamını oku ▾</button>
+        <div class="prod-desc-full">Karadeniz mutfağının vazgeçilmezlerinden kara lahana, bizim köyümüzde sonbaharın ortasında dikilip kışın soğuk havalarında olgunlaşır — hatta ilk donlardan sonra toplanan lahananın daha lezzetli olduğuna inanılır. Koyu yeşil-mor arası renkli, ince kıvrımlı yapraklarıyla klasik beyaz lahanadan oldukça farklıdır. Yüksek lif, C vitamini ve antioksidan içeriğiyle özellikle kış aylarında bağışıklık sistemine destek olur. Geleneksel kara lahana çorbasında, kavurmada ya da sarmalarda kullanılabilir. İsteğe göre taze ya da güneşte kurutulmuş olarak sunuyoruz; kurutulmuş versiyon daha uzun raf ömrüne sahiptir ve suda bekletilerek kolayca eski haline getirilebilir. Hiçbir kimyasal gübre kullanılmadan, tamamen doğal yöntemlerle yetiştirilir.</div>
         <div class="prod-tags"><span class="tag">Taze</span><span class="tag">Kurutulmuş</span></div>
         <div class="prod-price loading" data-pid="kara-lahana">Fiyat yükleniyor…</div>
       </div>
@@ -929,6 +946,8 @@ footer ul li a:hover { color: var(--light-hazel); }
         <div class="prod-cat">Yöresel Bakliyat</div>
         <div class="prod-name">Fırında Kurutulmuş Fasulye</div>
         <div class="prod-desc">Geleneksel taş fırında kurutulan, uzun süre dayanıklı yöresel fasulye.</div>
+        <button class="prod-desc-toggle" onclick="toggleDesc(this)">Devamını oku ▾</button>
+        <div class="prod-desc-full">Köyümüzün dağlık arazisinde yetiştirilen taze fasulye, hasat edildikten sonra kuru kuru fasulyeden farklı bir süreçten geçer: taze haliyle toplanan fasulyeler geleneksel taş fırında kurutularak hazırlanır. Bu yöntem, fasulyeye hem uzun bir raf ömrü kazandırır hem de kendine has, hafif kavrulmuş bir aroma katar — sıradan kuru fasulyeden dokusu ve lezzeti bakımından belirgin şekilde ayrılır. Küçük aile bahçelerinde, endüstriyel tarımdan uzak, doğal koşullarda yetiştirilir. Bitkisel protein, lif ve demir açısından zengin olan bu ürün, özellikle et tüketimini azaltmak isteyenler için değerli bir alternatif sunar. Karadeniz mutfağında mısır unu ve tereyağıyla, bazen kara lahanayla birlikte pişirilerek doyurucu bir kış yemeği haline getirilir.</div>
         <div class="prod-tags"><span class="tag">Fırın Kurusu</span><span class="tag">Uzun Ömürlü</span></div>
         <div class="prod-price loading" data-pid="fasulye">Fiyat yükleniyor…</div>
       </div>
@@ -942,6 +961,8 @@ footer ul li a:hover { color: var(--light-hazel); }
         <div class="prod-cat">Yöresel Ekmek</div>
         <div class="prod-name">Mısır Ekmeği</div>
         <div class="prod-desc">Karadeniz usulü, taş değirmende öğütülmüş mısır unuyla yapılan geleneksel ekmek.</div>
+        <button class="prod-desc-toggle" onclick="toggleDesc(this)">Devamını oku ▾</button>
+        <div class="prod-desc-full">Karadeniz sofralarının en köklü geleneklerinden biri olan mısır ekmeği, bizim köyümüzde hâlâ eski yöntemlerle hazırlanıyor. Taş değirmende öğütülen mısır unu, su ve tuzla yoğrulup taş fırında ya da sac üzerinde pişirilir — bu yöntem, dışı hafif çıtır, içi yumuşak ve nemli bir doku kazandırır. Geleneksel tarifte buğday unu kullanılmadığı için doğal olarak glutensiz bir alternatif arayanlar için de uygun bir seçenektir. Yüksek lif içeriği ve düşük glisemik indeksiyle, buğday ekmeğine kıyasla daha sağlıklı bir seçim olarak öne çıkar. Kara lahana çorbası, kavurma ya da taze peynirle birlikte tüketildiğinde Karadeniz sofrasının klasik lezzetini tamamlar. Talep üzerine taze olarak hazırlanıp gönderilir.</div>
         <div class="prod-tags"><span class="tag">Ev Yapımı</span><span class="tag">Geleneksel Tarif</span></div>
         <div class="prod-price loading" data-pid="misir-ekmegi">Fiyat yükleniyor…</div>
       </div>
@@ -955,6 +976,8 @@ footer ul li a:hover { color: var(--light-hazel); }
         <div class="prod-cat">Yöresel Bakliyat</div>
         <div class="prod-name">Yöresel Mısır</div>
         <div class="prod-desc">Karadeniz yaylaları mısırı – kurutulmuş ya da unda hazır.</div>
+        <button class="prod-desc-toggle" onclick="toggleDesc(this)">Devamını oku ▾</button>
+        <div class="prod-desc-full">Bölgemizin nemli ve yağışlı iklimi, mısır yetiştiriciliği için son derece elverişli koşullar sunuyor. Yerli tohumlardan yetiştirilen mısırlarımız, hasat sonrası doğal yollarla kurutulur ve isteğe göre tane olarak ya da öğütülmüş un halinde sunulur. Genetiği değiştirilmiş tohum kullanılmadan, geleneksel yöntemlerle üretilen bu mısır, hem hayvan yemi hem de insan beslenmesinde temel bir gıda kaynağı olarak yüzyıllardır köyümüzün ekonomisinde önemli bir yer tutuyor. Un haline getirildiğinde mısır ekmeği, kuymak ve çeşitli geleneksel Karadeniz tariflerinde kullanılabilir; tane halinde ise kendi mutfağınızda öğütüp taze un elde edebilirsiniz. Kompleks karbonhidrat ve lif açısından zengin bir gıda kaynağıdır.</div>
         <div class="prod-tags"><span class="tag">Yerli Tohum</span><span class="tag">Kurutulmuş</span></div>
         <div class="prod-price loading" data-pid="misir">Fiyat yükleniyor…</div>
       </div>
@@ -1182,6 +1205,13 @@ async function loadProductPrices() {
 loadProductPrices();
 
 /* form */
+function toggleDesc(btn) {
+  const full = btn.nextElementSibling;
+  const open = full.style.display === 'block';
+  full.style.display = open ? 'none' : 'block';
+  btn.textContent = open ? 'Devamını oku ▾' : 'Daha az göster ▴';
+}
+
 function toggleMiktar() {
   const product = document.getElementById('product').value;
   const group = document.getElementById('miktarGroup');
