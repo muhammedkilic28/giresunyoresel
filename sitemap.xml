@@ -8,21 +8,63 @@
   </url>
 
   <url>
+    <loc>https://giresunyoresel.com.tr/yazilarimiz.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <url>
+    <loc>https://giresunyoresel.com.tr/yazilar/findik-hasadi-nasil-yapilir.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://giresunyoresel.com.tr/yazilar/findik-ekonomisi.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://giresunyoresel.com.tr/yazilar/kara-lahana.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://giresunyoresel.com.tr/yazilar/koyumuzun-tarihi.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://giresunyoresel.com.tr/yazilar/findik-cesitleri.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://giresunyoresel.com.tr/yazilar/misir-ekmegi.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://giresunyoresel.com.tr/yazilar/imece-usulu.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
     <loc>https://giresunyoresel.com.tr/blog.html</loc>
     <changefreq>daily</changefreq>
-    <priority>0.9</priority>
+    <priority>0.7</priority>
   </url>
 
   <url>
     <loc>https://giresunyoresel.com.tr/ilanlar.html</loc>
     <changefreq>daily</changefreq>
-    <priority>0.8</priority>
+    <priority>0.6</priority>
   </url>
 
   <url>
     <loc>https://giresunyoresel.com.tr/ilan-ver.html</loc>
     <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+    <priority>0.5</priority>
   </url>
 
   <url>
